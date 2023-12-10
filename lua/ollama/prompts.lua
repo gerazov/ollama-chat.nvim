@@ -1,5 +1,8 @@
 local response_format = "Respond EXACTLY in this format:\n```$ftype\n<your code>\n```"
 
+local model_lang = "openhermes2-mistral"
+local model_code = "codellama"
+
 local prompts = {
 	Ask_About_Code = {
 		prompt = "I have a question about this: $input\n\n Here is the code:\n```$ftype\n$sel```",
@@ -40,7 +43,14 @@ local prompts = {
     -- input_label = ">",
     action = "chat",
     extract = false,
-    -- model = model_lang,
+    model = model_lang,
+  },
+  Chat_Code = {
+    prompt = "$buf\n",
+    -- input_label = ">",
+    action = "chat",
+    extract = false,
+    model = model_lang,
   },
 }
 

@@ -90,7 +90,15 @@ function prompts.generate_prompts(model, model_code)
       -- input_label = ">",
       action = "chat",
       extract = false,
-      -- model = model_lang,
+      model = model,
+    },
+
+    Chat_Code = {
+      prompt = "$buf\n",
+      -- input_label = ">",
+      action = "chat",
+      extract = false,
+      model = model_code,
     },
   }
 

@@ -241,7 +241,7 @@ function M.prompt(name)
 	end
 
 	if type(action) == "string" then
-		action = require("ollama.actions")[action]
+		action = require("ollama-chat.actions")[action]
 	end
 
 	local fn = action[1] or action.fn

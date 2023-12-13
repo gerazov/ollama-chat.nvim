@@ -1,7 +1,7 @@
 ---@type table<string, Ollama.PromptAction>
 local actions = {}
 
-local factory = require("ollama.actions.factory")
+local factory = require("ollama-chat.actions.factory")
 
 actions.display = factory.create_action({ display = true, show_prompt = true })
 
@@ -28,7 +28,7 @@ actions.chat = {
 		local pre_lines = vim.api.nvim_buf_get_lines(out_buf, 0, -1, false)
     local tokens = {}
 		-- show a rotating spinner while waiting for the response
-		local timer = require("ollama.util").show_spinner(
+		local timer = require("ollama-chat.util").show_spinner(
 		  out_buf,
 		  { start_ln = #pre_lines, end_ln = #pre_lines + 1 }
 		) -- the +1 makes sure the old spinner is replaced
@@ -65,7 +65,7 @@ actions.chat = {
 				timer:stop()
 				vim.api.nvim_buf_set_lines(out_buf, #pre_lines, #pre_lines + 1, false, {
 					("> Ollama in %ss."):format(
-            require("ollama.util").nano_to_seconds(body.total_duration)
+            require("ollama-chat.util").nano_to_seconds(body.total_duration)
           )
         })
 			vim.api.nvim_buf_set_lines(

@@ -74,10 +74,40 @@ local M = {}
 
 function M.default_config()
   return {
-    model = "mistral",
+    model = "openhermes2-mistral",
     model_code = "codellama",
     url = "http://127.0.0.1:11434",
     prompts = {},  -- generated in setup
+    keys = {
+      {
+        "<leader>occ",
+        ":<c-u>lua require('ollama-chat').create_chat()<cr>",
+        desc = "Create Ollama Chat",
+        mode = { "n", "x" },
+        silent = true,
+      },
+      {
+        "<leader>och",
+        ":<c-u>lua require('ollama-chat').prompt('Chat')<cr>",
+        desc = "Chat",
+        mode = { "n" },
+        silent = true,
+      },
+      {
+        "<leader>ocd",
+        ":<c-u>lua require('ollama-chat').prompt('Chat_Code')<cr>",
+        desc = "Chat Code",
+        mode = { "n" },
+        silent = true,
+      },
+      {
+        "<leader>opp",
+        ":<c-u>lua require('ollama-chat').prompt()<cr>",
+        desc = "ollama prompt",
+        mode = { "n", "x" },
+        silent = true,
+      },
+    },
     serve = {
       on_start = false,
       command = "ollama",
@@ -202,10 +232,10 @@ local function show_prompt_picker(callback)
       return item:gsub("_", " ")
     end,
   }, function(selected, _)
-    if selected then
-      callback(selected)
-    end
-  end)
+      if selected then
+        callback(selected)
+      end
+    end)
 end
 
 --- Query the ollama server with the given prompt
@@ -394,13 +424,13 @@ function M.choose_model()
       return item
     end,
   }, function(selected)
-    if not selected then
-      return
-    end
+      if not selected then
+        return
+      end
 
-    M.config.model = selected
-    vim.api.nvim_notify(("Selected model '%s'"):format(selected), vim.log.levels.INFO, { title = "Ollama" })
-  end)
+      M.config.model = selected
+      vim.api.nvim_notify(("Selected model '%s'"):format(selected), vim.log.levels.INFO, { title = "Ollama" })
+    end)
 end
 
 -- Run the ollama server
@@ -482,13 +512,13 @@ function M.setup(opts)
   vim.api.nvim_create_user_command("Ollama", function(arg)
     M.prompt(arg.args[1] or arg.args or nil)
   end, {
-    nargs = "?",
-    range = true,
-    complete = function()
-      return get_prompts_list()
-    end,
-    desc = "Query ollama server with the chosen prompt",
-  })
+      nargs = "?",
+      range = true,
+      complete = function()
+        return get_prompts_list()
+      end,
+      desc = "Query ollama server with the chosen prompt",
+    })
 
   vim.api.nvim_create_user_command("OllamaModel", M.choose_model, {
     desc = "List and select from available ollama models",

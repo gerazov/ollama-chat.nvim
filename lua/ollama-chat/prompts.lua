@@ -1,7 +1,7 @@
 local prompts = {}
 local response_format = "Respond EXACTLY in this format:\n```$ftype\n<your code>\n```"
 
-function prompts.generate_prompts(model, model_code)
+function prompts.generate_prompts(model, model_code, prompts)
   if model_code == nil then
     model_code = model
   end
@@ -101,6 +101,7 @@ function prompts.generate_prompts(model, model_code)
       model = model_code,
     },
   }
+  prompts_table = vim.tbl_deep_extend("force", prompts_table, prompts or {})
 
   return prompts_table
 end

@@ -475,7 +475,7 @@ function M.setup(opts)
   ---@diagnostic disable-next-line: assign-type-mismatch
   M.config = vim.tbl_deep_extend("force", M.config, opts or {})
   M.config.prompts = require("ollama-chat.prompts").generate_prompts(
-    M.config.model, M.config.model_code
+    M.config.model, M.config.model_code, M.config.prompts
   )
 
   -- add command

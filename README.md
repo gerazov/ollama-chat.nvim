@@ -24,40 +24,39 @@ return {
   -- All the user commands added by the plugin
   cmd = { "Ollama", "OllamaModel", "OllamaServe", "OllamaServeStop" },
 
-    
   keys = {
     {
       "<leader>occ",
-      ":<c-u>lua require('ollama').create_chat()<cr>",
+      ":<c-u>lua require('ollama-chat').create_chat()<cr>",
       desc = "Create Ollama Chat",
-      mode = { "n" },
+      mode = { "n", "x" },
       silent = true,
     },
     {
-      "<leader>oct",
-      ":<c-u>lua require('ollama').prompt('Chat')<cr>",
+      "<leader>och",
+      ":<c-u>lua require('ollama-chat').prompt('Chat')<cr>",
       desc = "Chat",
       mode = { "n" },
       silent = true,
     },
     {
       "<leader>ocd",
-      ":<c-u>lua require('ollama').prompt('Chat Code')<cr>",
+      ":<c-u>lua require('ollama-chat').prompt('Chat_Code')<cr>",
       desc = "Chat Code",
       mode = { "n" },
       silent = true,
     },
     {
-      "<leader>oo",
-      ":<c-u>lua require('ollama').prompt()<cr>",
+      "<leader>opp",
+      ":<c-u>lua require('ollama-chat').prompt()<cr>",
       desc = "ollama prompt",
-      mode = { "n", "v" },
+      mode = { "n", "x" },
+      silent = true,
     },
   },
 
-  ---@type Ollama.Config
   opts = {
-      model = "mistral",
+      model = "openhermes2-mistral",
       model_code = "codellama",
       url = "http://127.0.0.1:11434",
       serve = {

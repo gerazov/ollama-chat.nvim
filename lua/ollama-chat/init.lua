@@ -78,36 +78,6 @@ function M.default_config()
     model_code = "codellama",
     url = "http://127.0.0.1:11434",
     prompts = {},  -- generated in setup
-    keys = {
-      {
-        "<leader>occ",
-        ":<c-u>lua require('ollama-chat').create_chat()<cr>",
-        desc = "Create Ollama Chat",
-        mode = { "n", "x" },
-        silent = true,
-      },
-      {
-        "<leader>och",
-        ":<c-u>lua require('ollama-chat').prompt('Chat')<cr>",
-        desc = "Chat",
-        mode = { "n" },
-        silent = true,
-      },
-      {
-        "<leader>ocd",
-        ":<c-u>lua require('ollama-chat').prompt('Chat_Code')<cr>",
-        desc = "Chat Code",
-        mode = { "n" },
-        silent = true,
-      },
-      {
-        "<leader>opp",
-        ":<c-u>lua require('ollama-chat').prompt()<cr>",
-        desc = "ollama prompt",
-        mode = { "n", "x" },
-        silent = true,
-      },
-    },
     serve = {
       on_start = false,
       command = "ollama",

@@ -105,10 +105,8 @@ function prompts.generate_prompts(model, model_code, user_prompts)
     },
 
     Enhance_wording = {
-      prompt = [[
-          Modify the following text to use better wording, just output
-          the final text without additional quotes around it:\n$sel
-          ]],
+      prompt = "Modify the following text to use better wording, just output "
+        .. "the final text without additional quotes around it:\n$sel",
       model = model,
     },
 
@@ -154,7 +152,7 @@ function prompts.generate_prompts(model, model_code, user_prompts)
       model = model,
     },
 
-    Chat_Code = {
+    Chat_code = {
       prompt = "$buf\n",
       action = "chat",
       model = model_code,

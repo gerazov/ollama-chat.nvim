@@ -162,23 +162,13 @@ local function parse_prompt(prompt)
   end
 
   if text:find("$sel") then
-    local sel_start = vim.fn.getpos("'<") or { 0, 0, 0, 0 }
-    local sel_end = vim.fn.getpos("'>") or { 0, 0, 0, 0 }
-
-    -- address inconsistencies between visual and visual line mode
-    local mode = vim.fn.visualmode()
-    if mode == "V" then
-      sel_end[3] = sel_end[3] - 1
-    end
+    local sel_range = require("ollama-chat.util").get_selection_pos()
 
     local sel_text = vim.api.nvim_buf_get_text(
       -- TODO: check if buf exists
       ---@diagnostic disable-next-line: param-type-mismatch
       vim.fn.bufnr("%"),
-      sel_start[2] - 1,
-      sel_start[3] - 1,
-      sel_end[2] - 1,
-      sel_end[3], -- end_col is exclusive
+      sel_range[1], sel_range[2], sel_range[3], sel_range[4],
       {}
     )
     text = text:gsub("$sel", table.concat(sel_text, "\n"))
@@ -203,6 +193,7 @@ local function show_prompt_picker(callback)
     end,
   }, function(selected, _)
       if selected then
+        vim.print(selected)
         callback(selected)
       end
     end)
@@ -215,6 +206,7 @@ end
 --- `:<c-u>lua require("ollama").prompt()`
 function M.prompt(name)
   if not name or name:len() < 1 then
+    -- if the prompt picker is called from visual mode extract the selection
     show_prompt_picker(M.prompt)
     return
   end
@@ -320,23 +312,45 @@ end
 
 --- create new chat buffer and window
 function M.create_chat()
+  local filetype = vim.bo.filetype
+  local cur_buf = vim.api.nvim_get_current_buf()
+  -- if spawned from visual mode copy selection to chat buffer
+  local mode = vim.api.nvim_get_mode().mode
+  vim.print(vim.api.nvim_get_mode().mode)
+  local visual_modes = { "v", "V", "" }
+  local sel_text_str = ""
+  if vim.tbl_contains(visual_modes, mode) then
+    local sel_range = require("ollama-chat.util").get_selection_pos()
+
+    local sel_text = vim.api.nvim_buf_get_text(
+      cur_buf, sel_range[1], sel_range[2], sel_range[3], sel_range[4],
+      {}
+    )
+    sel_text_str = table.concat(sel_text, "\n")
+    -- if filetype is not text, markdown or latex then wratp in code block
+    local noncode_filetypes = { "text", "markdown", "org", "mail", "latex" }
+    if filetype == nil or not vim.tbl_contains(noncode_filetypes, filetype) then
+      sel_text_str = "\n```" .. filetype .. "\n" .. sel_text_str .. "\n```\n"
+    end
+  end
   local out_buf = vim.api.nvim_create_buf(true, false)  -- create a normal buffer
   local out_win = vim.api.nvim_get_current_win()
+
   vim.api.nvim_set_current_buf(out_buf)
   vim.api.nvim_buf_set_name(out_buf, "/tmp/ollama-chat.md")
   vim.api.nvim_set_option_value("filetype", "markdown", { buf = out_buf })
-  -- vim.api.nvim_set_option_value("buftype", "nofile", { buf = out_buf })
   vim.api.nvim_set_option_value("wrap", true, { win = out_win })
   vim.api.nvim_set_option_value("linebreak", true, { win = out_win })
-  local pre_text = [[
-You are an AI agent called Ollama that is helping the User with his queries.
-The User enters their prompts after lines beginning with '> User'.
-Your answers start at lines beginning with '> Ollama'.
-You should output only responses and not the special sequences '> User' and '> Ollama'.
 
-> User
-]]
+  local pre_text = "You are an AI agent called Ollama that is helping the User "
+    .. "with his queries. The User enters their prompts after lines beginning "
+    .. "with '> User'.\n"
+    .. "Your answers start at lines beginning with '> Ollama'.\n"
+    .. "You should output only responses and not the special sequences '> User' "
+    .. "and '> Ollama'.\n"
+  pre_text = pre_text .. sel_text_str .. "\n" .. "\n> User\n"
   local pre_lines = vim.split(pre_text, "\n")
+
   vim.api.nvim_buf_set_lines(out_buf, 0, -1, false, pre_lines)
   vim.api.nvim_win_set_cursor(0, { #pre_lines, 0 })
   vim.cmd [[w!]]  --overwrite file if exists TODO manage chats in an ollama folder

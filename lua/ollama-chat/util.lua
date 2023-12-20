@@ -96,9 +96,21 @@ end
 -- Useful for replacing text in a buffer based on a selection range.
 ---@return number[]|nil { start_line, start_col, end_line, end_col }
 function util.get_selection_pos()
-  local sel_start = vim.fn.getpos("'<")
-  local sel_end = vim.fn.getpos("'>")
-  local mode = vim.fn.visualmode()
+  local mode = vim.api.nvim_get_mode().mode
+  vim.print(mode)
+  local sel_start, sel_end
+  if mode == "n" then
+    print("using < and >")
+    mode = vim.fn.visualmode()  -- get the last visual mode
+    print(mode)
+    sel_start = vim.fn.getpos("'<")
+    sel_end = vim.fn.getpos("'>")
+  else  -- visual mode
+    sel_start = vim.fn.getpos("v")
+    sel_end = vim.fn.getpos(".")
+  end
+  vim.print(sel_start)
+  vim.print(sel_end)
 
   if
     sel_start == nil

@@ -45,7 +45,7 @@ function factory.create_action(opts)
       local sel_pos
       if opts.replace then
         bufnr = vim.fn.bufnr("%") or 0
-        sel_pos = require("ollama.util").get_selection_pos()
+        sel_pos = require("ollama-chat.util").get_selection_pos()
         if sel_pos == nil then
           vim.api.nvim_notify("No selection found", vim.log.levels.INFO, { title = "Ollama" })
           return false
@@ -64,20 +64,20 @@ function factory.create_action(opts)
         vim.api.nvim_buf_set_lines(out_buf, 0, -1, false, pre_lines)
 
         if opts.window == "float" then
-          out_win = require("ollama.util").open_floating_win(out_buf, { title = prompt.model })
+          out_win = require("ollama-chat.util").open_floating_win(out_buf, { title = prompt.model })
         elseif opts.window == "split" then
           vim.cmd("split")
           out_win = vim.api.nvim_get_current_win()
-          require("ollama.util").set_output_options(out_buf, out_win)
+          require("ollama-chat.util").set_output_options(out_buf, out_win)
           vim.api.nvim_win_set_buf(out_win, out_buf)
         elseif opts.window == "vsplit" then
           vim.cmd("vsplit")
           out_win = vim.api.nvim_get_current_win()
-          require("ollama.util").set_output_options(out_buf, out_win)
+          require("ollama-chat.util").set_output_options(out_buf, out_win)
           vim.api.nvim_win_set_buf(out_win, out_buf)
         end
 
-        timer = require("ollama.util").show_spinner(out_buf, { start_ln = #pre_lines, end_ln = #pre_lines + 1 }) -- the +1 makes sure the old spinner is replaced
+        timer = require("ollama-chat.util").show_spinner(out_buf, { start_ln = #pre_lines, end_ln = #pre_lines + 1 }) -- the +1 makes sure the old spinner is replaced
 
         -- empty lines as padding so that the response lands in the right place
         vim.api.nvim_buf_set_lines(out_buf, -1, -1, false, { "", "" })
@@ -121,7 +121,7 @@ function factory.create_action(opts)
             vim.api.nvim_buf_set_lines(out_buf, #pre_lines, #pre_lines + 1, false, {
               ("> %s in %ss."):format(
                 prompt.model,
-                require("ollama.util").nano_to_seconds(body.total_duration)
+                require("ollama-chat.util").nano_to_seconds(body.total_duration)
               ),
             })
             vim.api.nvim_set_option_value("modifiable", false, { buf = out_buf })

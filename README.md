@@ -53,6 +53,27 @@ return {
       mode = { "n", "x" },
       silent = true,
     },
+    {
+      "<leader>opi",
+      function() require('ollama-chat').prompt('Ask') end,
+      desc = "ollama prompt",
+      mode = { "n" },
+      silent = true,
+    },
+    {
+      "<leader>ops",
+      function() require('ollama-chat').prompt('Synonyms') end,
+      desc = "ollama prompt",
+      mode = { "n", "v" },
+      silent = true,
+    },
+    {
+      "<leader>opd",
+      function() require('ollama-chat').prompt('Define') end,
+      desc = "ollama prompt",
+      mode = { "n", "v" },
+      silent = true,
+    },
   },
 
   opts = {
@@ -68,6 +89,9 @@ return {
       },
     }
 ```
-\* Note that to have selections to work when picking a prompt with prompt picker, i.e. when calling `prompt()` without arguments you have to map it using `:<c-u>` so that the mode changes from visual to normal and the `'<` and `'>` marks get created. On the other hand, creating the chat needs to be called from visual mode so that the selection is copied in the chat buffer.
+\* Note that to have selections to work when picking a prompt with prompt picker, i.e. when calling `prompt()` without arguments, you have to map it using `:<c-u>` so that the mode changes from visual to normal and the `'<` and `'>` marks get created. 
+
+This is not important when mapping selection based prompts directly, i.e. you can use `:<c-u>` or `<cmd>` or a lua function as shown here.
+On the other hand, creating the chat needs to be called from visual mode, as it triggers the copying of the selection to the chat buffer.
 
 Refer to the upstream [ollama.nvim](https://github.com/nomnivore/ollama.nvim) README for more information.

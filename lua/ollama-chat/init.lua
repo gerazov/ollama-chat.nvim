@@ -104,19 +104,27 @@ end
 
 ---@param job Job
 local function add_job(job)
+  vim.print("adding job")
   jobs[job.pid] = job
   update_jobs_length()
+  vim.print(jobs_length .. " total jobs")
 end
 
 ---@param job Job
 local function del_job(job)
+  vim.print("deleting job")
   jobs[job.pid] = nil
   update_jobs_length()
+  vim.print(jobs_length .. " total jobs")
 end
 
 function M.cancel_all_jobs()
-  for _, job in ipairs(jobs) do
+  vim.print("shutting down jobs")
+  vim.print(jobs_length .. " jobs remaining")
+  for _, job in pairs(jobs) do
+    vim.print("shutting down " .. job.pid)
     job:shutdown()
+    vim.print(jobs_length .. " jobs remaining")
   end
 end
 
@@ -193,7 +201,6 @@ local function show_prompt_picker(callback)
     end,
   }, function(selected, _)
       if selected then
-        vim.print(selected)
         callback(selected)
       end
     end)
@@ -236,9 +243,6 @@ function M.prompt(name)
     action = require("ollama-chat.actions")[action]
   end
 
-  local fn = action[1] or action.fn
-  local opts = action[2] or action.opts
-
   local parsed_prompt = parse_prompt(prompt)
 
   local extract = prompt.extract
@@ -251,6 +255,9 @@ function M.prompt(name)
   end
 
   -- this can probably be improved
+  local fn = action[1] or action.fn
+  local opts = action[2] or action.opts
+
   local cb = fn({
     model = model,
     prompt = prompt.prompt,
@@ -266,7 +273,6 @@ function M.prompt(name)
 
   local stream = opts and opts.stream or false
   local stream_called = false
-
   local job = require("plenary.curl").post(M.config.url .. "/api/generate", {
     body = vim.json.encode({
       model = model,
@@ -285,6 +291,7 @@ function M.prompt(name)
   })
   ---@param j Job
   job:add_on_exit_callback(function(j)
+    vim.print(job.pid .. " job exited")
     if stream_called then
       return
     end
@@ -306,7 +313,6 @@ function M.prompt(name)
     -- be handled in the handle_stream method
   end)
   job:add_on_exit_callback(del_job)
-
   add_job(job)
 end
 
@@ -316,7 +322,6 @@ function M.create_chat()
   local cur_buf = vim.api.nvim_get_current_buf()
   -- if spawned from visual mode copy selection to chat buffer
   local mode = vim.api.nvim_get_mode().mode
-  vim.print(vim.api.nvim_get_mode().mode)
   local visual_modes = { "v", "V", "" }
   local sel_text_str = ""
   if vim.tbl_contains(visual_modes, mode) then
@@ -354,7 +359,28 @@ function M.create_chat()
   vim.api.nvim_buf_set_lines(out_buf, 0, -1, false, pre_lines)
   vim.api.nvim_win_set_cursor(0, { #pre_lines, 0 })
   vim.cmd [[w!]]  --overwrite file if exists TODO manage chats in an ollama folder
-  vim.api.nvim_buf_set_keymap(out_buf, "n", "q", "<cmd>bd!<cr>", { noremap = true })
+  -- vim.api.nvim_buf_set_keymap(out_buf, "n", "q", "<cmd>bd!<cr>", { noremap = true })
+  vim.keymap.set(
+    "n", "q",
+    function()
+      M.cancel_all_jobs()
+      vim.cmd [[ normal Go> User ]]
+      vim.cmd [[ normal Go ]]
+    end,
+    { buffer = out_buf, noremap = true, desc = "Stop generating" }
+  )
+  vim.keymap.set(
+    "n", "<leader>q",
+    function()
+      M.cancel_all_jobs()
+      vim.cmd [[ bd! ]]
+    end,
+    { buffer = out_buf, noremap = true, desc = "Quit Ollama chat" }
+  )
+  vim.cmd [[ normal Gi ]]
+  -- vim.api.nvim_buf_attach(out_buf, false, {
+  --   on_detach = M.cancel_all_jobs(),
+  -- })
 end
 
 ---@class Ollama.ModelsApiResponseModel
@@ -420,6 +446,7 @@ end
 -- Run the ollama server
 ---@param opts? { silent: boolean? }
 function M.run_serve(opts)
+  vim.print("running serve")
   opts = opts or {}
   local serve_job = require("plenary.job"):new({
     command = M.config.serve.command,
@@ -453,6 +480,7 @@ end
 -- Stop the ollama server
 ---@param opts? { silent: boolean? }
 function M.stop_serve(opts)
+  vim.print("stopping serve")
   opts = opts or {}
   require("plenary.job")
     :new({
@@ -513,7 +541,7 @@ function M.setup(opts)
   end, { desc = "Start the ollama server" })
   vim.api.nvim_create_user_command("OllamaServeStop", function()
     M.stop_serve()
-  end, { desc = "Start the ollama server" })
+  end, { desc = "Stop the ollama server" })
 
   if M.config.serve.on_start then
     M.run_serve()

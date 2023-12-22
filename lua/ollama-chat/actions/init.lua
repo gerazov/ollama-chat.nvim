@@ -25,20 +25,24 @@ actions.display_prompt = actions.display
 actions.chat = {
   fn = function()
     local out_buf = vim.api.nvim_get_current_buf()
+    vim.cmd [[ norm Go ]]
     local pre_lines = vim.api.nvim_buf_get_lines(out_buf, 0, -1, false)
     local tokens = {}
     -- show a rotating spinner while waiting for the response
-    local timer = require("ollama-chat.util").show_spinner(
-      out_buf,
-      { start_ln = #pre_lines, end_ln = #pre_lines + 1 }
-    ) -- the +1 makes sure the old spinner is replaced
+    -- local timer = require("ollama-chat.util").show_spinner(
+    --   out_buf,
+    --   { start_ln = #pre_lines, end_ln = #pre_lines + 1 }
+    -- ) -- the +1 makes sure the old spinner is replaced
+    vim.api.nvim_buf_set_lines(out_buf, #pre_lines, #pre_lines + 1, false, { "> Ollama ..." })
     -- empty line so that the response lands in the right place
     vim.api.nvim_buf_set_lines(out_buf, -1, -1, false, { "" })
+    vim.cmd [[ norm G ]]
 
     ---@type Job?
     local job
     local is_cancelled = false
     vim.api.nvim_buf_attach(out_buf, false, {
+      -- this doesn't work - on bd, the job is still running
       on_detach = function()
         if job ~= nil then
           is_cancelled = true
@@ -50,9 +54,10 @@ actions.chat = {
     ---@type Ollama.PromptActionResponseCallback
     return function(body, _job)
       if job == nil and _job ~= nil then
+      -- if job == nil then
         job = _job
         if is_cancelled then
-          timer:stop()
+          -- timer:stop()
           job:shutdown()
         end
       end
@@ -62,18 +67,18 @@ actions.chat = {
       )
 
       if body.done then
-        timer:stop()
+        -- timer:stop()
         vim.api.nvim_buf_set_lines(out_buf, #pre_lines, #pre_lines + 1, false, {
           ("> Ollama in %ss."):format(
             require("ollama-chat.util").nano_to_seconds(body.total_duration)
           )
         })
-      vim.api.nvim_buf_set_lines(
-        out_buf, -1, -1, false, vim.split("\n\n> User\n", "\n")
-      )
-      -- vim.api.nvim_win_set_cursor(0, { -1, 0 }) -- simpler to use norm
-      vim.cmd [[ norm G ]]
-      vim.cmd [[ w ]]
+        vim.api.nvim_buf_set_lines(
+          out_buf, -1, -1, false, vim.split("\n\n> User\n", "\n")
+        )
+        -- vim.api.nvim_win_set_cursor(0, { -1, 0 }) -- simpler to use norm
+        vim.cmd [[ norm G ]]
+        vim.cmd [[ w ]]
       end
     end
   end,

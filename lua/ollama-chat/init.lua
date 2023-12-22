@@ -1,6 +1,6 @@
 local M = {}
 
----@class Ollama.Prompt
+---@classOllama*.Prompt
 ---@field prompt string The prompt to send to the model.
 --[[
     Replaces the following tokens:
@@ -13,23 +13,23 @@ local M = {}
     $lnum:  The current line number in the buffer
 --]]
 ---@field input_label string? The label to use for an input field
----@field action Ollama.PromptActionBuiltinEnum | Ollama.PromptAction | nil How to handle the output (default: config.action)
+---@field actionOllama*.PromptActionBuiltinEnum |Ollama*.PromptAction | nil How to handle the output (default: config.action)
 ---@field model string? The model to use for this prompt (default: config.model)
 ---@field extract string | false | nil A `string.match` pattern to use for an Action to extract the output from the response (Insert/Replace) (default: "```$ftype\n(.-)```" )
----@field options Ollama.PromptOptions? additional model parameters, such as temperature, listed in the documentation for the [Modelfile](https://github.com/jmorganca/ollama/blob/main/docs/modelfile.md#valid-parameters-and-values)
+---@field optionsOllama*.PromptOptions? additional model parameters, such as temperature, listed in the documentation for the [Modelfile](https://github.com/jmorganca/ollama/blob/main/docs/modelfile.md#valid-parameters-and-values)
 ---@field system string? The SYSTEM instruction specifies the system prompt to be used in the Modelfile template, if applicable. (overrides what's in the Modelfile)
 ---@field format "json"? the format to return a response in. Currently the only accepted value is json
 
 -- Additional options for the prompt, as defined in `Modelfile` docs
 -- Please check the official documentation for the latest information, as this may be out of date.
----@class Ollama.PromptOptions
+---@classOllama*.PromptOptions
 ---@field mirostat integer? Enable Mirostat sampling for controlling perplexity. (default: 0, 0 = disabled, 1 = Mirostat, 2 = Mirostat 2.0)
 ---@field mirostat_eta float? Influences how quickly the algorithm responds to feedback from the generated text. A lower learning rate will result in slower adjustments, while a higher learning rate will make the algorithm more responsive. (Default: 0.1)
 ---@field mirostat_tau float? Controls the balance between coherence and diversity of the output. A lower value will result in more focused and coherent text. (Default: 5.0)
 ---@field num_ctx integer? Sets the size of the context window used to generate the next token. (Default: 2048)
 ---@field num_gqa integer? The number of GQA groups in the transformer layer. Required for some models, for example, it is 8 for llama2:70b.
 ---@field num_gpu integer? The number of layers to send to the GPU(s). On macOS, it defaults to 1 to enable metal support, 0 to disable.
----@field num_thread integer? Sets the number of threads to use during computation. By default, Ollama will detect this for optimal performance. It is recommended to set this value to the number of physical CPU cores your system has (as opposed to the logical number of cores).
+---@field num_thread integer? Sets the number of threads to use during computation. By default,Ollama* will detect this for optimal performance. It is recommended to set this value to the number of physical CPU cores your system has (as opposed to the logical number of cores).
 ---@field repeat_last_n integer? Sets how far back for the model to look back to prevent repetition. (Default: 64, 0 = disabled, -1 = num_ctx)
 ---@field repeat_penalty float? Sets how strongly to penalize repetitions. A higher value (e.g., 1.5) will penalize repetitions more strongly, while a lower value (e.g., 0.9) will be more lenient. (Default: 1.1)
 ---@field temperature float? The temperature of the model. Increasing the temperature will make the model answer more creatively. (Default: 0.8)
@@ -41,31 +41,31 @@ local M = {}
 ---@field top_p float? Works together with top-k. A higher value (e.g., 0.95) will lead to more diverse text, while a lower value (e.g., 0.5) will generate more focused and conservative text. (Default: 0.9)
 
 ---Built-in actions
----@alias Ollama.PromptActionBuiltinEnum "display" | "replace" | "insert" | "display_replace" | "display_insert" | "display_prompt"
+---@aliasOllama*.PromptActionBuiltinEnum "display" | "replace" | "insert" | "display_replace" | "display_insert" | "display_prompt"
 
 -- Handles the output of a prompt. Custom Actions can be defined in lieu of a builtin.
----@alias Ollama.PromptAction table | Ollama.PromptActionFields
+---@aliasOllama*.PromptAction table |Ollama*.PromptActionFields
 -- The function to call when a response is received from the server
 -- `Job` is passed in when streaming is enabled
 -- TODO: type the data because we can predict the shape
----@alias Ollama.PromptActionResponseCallback fun(data: table, job: Job?)
+---@aliasOllama*.PromptActionResponseCallback fun(data: table, job: Job?)
 
----@class Ollama.PromptActionFields
+---@classOllama*.PromptActionFields
 -- TODO: type the fn arg table
----@field fn fun(prompt: table): Ollama.PromptActionResponseCallback | false | nil
----@field opts Ollama.PromptAction.Opts?
+---@field fn fun(prompt: table):Ollama*.PromptActionResponseCallback | false | nil
+---@field optsOllama*.PromptAction.Opts?
 
----@class Ollama.PromptAction.Opts
+---@classOllama*.PromptAction.Opts
 ---@field stream? boolean
 
----@class Ollama.Config
+---@classOllama*.Config
 ---@field model string? The default model to use
----@field prompts table<string, Ollama.Prompt | false>? A table of prompts to use for each model
----@field action Ollama.PromptActionBuiltinEnum | Ollama.PromptAction | nil How to handle prompt outputs when not specified by prompt
+---@field prompts table<string,Ollama*.Prompt | false>? A table of prompts to use for each model
+---@field actionOllama*.PromptActionBuiltinEnum |Ollama*.PromptAction | nil How to handle prompt outputs when not specified by prompt
 ---@field url string? The url to use to connect to the ollama server
----@field serve Ollama.Config.Serve? Configuration for the ollama server
+---@field serveOllama*.Config.Serve? Configuration for the ollama server
 
----@class Ollama.Config.Serve
+---@classOllama*.Config.Serve
 ---@field on_start boolean? Whether to start the ollama server on startup
 ---@field command string? The command to use to start the ollama server
 ---@field args string[]? The arguments to pass to the serve command
@@ -90,7 +90,7 @@ end
 
 M.config = M.default_config()
 
----@alias Ollama.StatusEnum "WORKING" | "IDLE"
+---@aliasOllama*.StatusEnum "WORKING" | "IDLE"
 
 local jobs = {}
 local jobs_length = 0
@@ -128,7 +128,7 @@ function M.cancel_all_jobs()
   end
 end
 
----@type fun(): Ollama.StatusEnum
+---@type fun():Ollama*.StatusEnum
 function M.status()
   if jobs_length > 0 then
     return "WORKING"
@@ -146,7 +146,7 @@ local function get_prompts_list()
   return prompts
 end
 
----@param prompt Ollama.Prompt
+---@param promptOllama*.Prompt
 local function parse_prompt(prompt)
   local text = prompt.prompt
   if text:find("$input") then
@@ -207,7 +207,7 @@ local function show_prompt_picker(callback)
 end
 
 --- Query the ollama server with the given prompt
---- Ollama model used is specified in the config and optionally overridden by the prompt
+---Ollama* model used is specified in the config and optionally overridden by the prompt
 ---@param name string? The name of the prompt to use
 --- When setting up a keymap, format the rhs like this to properly forward visual selection:
 --- `:<c-u>lua require("ollama").prompt()`
@@ -219,7 +219,7 @@ function M.prompt(name)
   end
   ---@cast name string
 
-  ---@type Ollama.Prompt
+  ---@typeOllama*.Prompt
   local prompt = M.config.prompts[name]
   if prompt == nil or prompt == false then
     vim.api.nvim_notify(("Prompt '%s' not found"):format(name), vim.log.levels.ERROR, { title = "Ollama" })
@@ -344,27 +344,27 @@ function M.create_chat()
   vim.api.nvim_set_current_buf(out_buf)
   vim.api.nvim_buf_set_name(out_buf, "/tmp/ollama-chat.md")
   vim.api.nvim_set_option_value("filetype", "markdown", { buf = out_buf })
+  vim.api.nvim_set_option_value("conceallevel", 1, { buf = out_buf })
   vim.api.nvim_set_option_value("wrap", true, { win = out_win })
   vim.api.nvim_set_option_value("linebreak", true, { win = out_win })
 
-  local pre_text = "You are an AI agent called Ollama that is helping the User "
-    .. "with his queries. The User enters their prompts after lines beginning "
-    .. "with '> User'.\n"
-    .. "Your answers start at lines beginning with '> Ollama'.\n"
-    .. "You should output only responses and not the special sequences '> User' "
-    .. "and '> Ollama'.\n"
-  pre_text = pre_text .. sel_text_str .. "\n" .. "\n> User\n"
+  local pre_text = "You are an AI agent calledOllama* that is helping theUser* "
+    .. "with his queries. TheUser* enters their prompts after lines beginning "
+    .. "with '*User*'.\n"
+    .. "Your answers start at lines beginning with '*Ollama*'.\n"
+    .. "You should output only responses and not the special sequences '*User*' "
+    .. "and '*Ollama*'.\n"
+  pre_text = pre_text .. sel_text_str .. "\n" .. "\n*User*\n"
   local pre_lines = vim.split(pre_text, "\n")
 
   vim.api.nvim_buf_set_lines(out_buf, 0, -1, false, pre_lines)
   vim.api.nvim_win_set_cursor(0, { #pre_lines, 0 })
-  vim.cmd [[w!]]  --overwrite file if exists TODO manage chats in an ollama folder
   -- vim.api.nvim_buf_set_keymap(out_buf, "n", "q", "<cmd>bd!<cr>", { noremap = true })
   vim.keymap.set(
     "n", "q",
     function()
       M.cancel_all_jobs()
-      vim.cmd [[ normal Go> User ]]
+      vim.cmd [[ normal Go*User* ]]
       vim.cmd [[ normal Go ]]
     end,
     { buffer = out_buf, noremap = true, desc = "Stop generating" }
@@ -375,22 +375,23 @@ function M.create_chat()
       M.cancel_all_jobs()
       vim.cmd [[ bd! ]]
     end,
-    { buffer = out_buf, noremap = true, desc = "Quit Ollama chat" }
+    { buffer = out_buf, noremap = true, desc = "QuitOllama* chat" }
   )
-  vim.cmd [[ normal Gi ]]
+  vim.cmd [[ normal G ]]
+  vim.cmd [[w!]]  --overwrite file if exists TODO manage chats in an ollama folder
   -- vim.api.nvim_buf_attach(out_buf, false, {
   --   on_detach = M.cancel_all_jobs(),
   -- })
 end
 
----@class Ollama.ModelsApiResponseModel
+---@classOllama*.ModelsApiResponseModel
 ---@field name string
 ---@field modified_at string
 ---@field size number
 ---@field digest string
 
----@class Ollama.ModelsApiResponse
----@field models Ollama.ModelsApiResponseModel[]
+---@classOllama*.ModelsApiResponse
+---@field modelsOllama*.ModelsApiResponseModel[]
 
 -- Query the ollama server for available models
 local function query_models()
@@ -512,7 +513,7 @@ function M.stop_serve(opts)
 end
 
 --- Setup the plugin
----@param opts Ollama.Config configuration options
+---@param optsOllama*.Config configuration options
 function M.setup(opts)
   ---@diagnostic disable-next-line: assign-type-mismatch
   M.config = vim.tbl_deep_extend("force", M.config, opts or {})

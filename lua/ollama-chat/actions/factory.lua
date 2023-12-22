@@ -83,7 +83,13 @@ function factory.create_action(opts)
         vim.api.nvim_buf_set_lines(out_buf, -1, -1, false, { "", "" })
 
         -- set some keybinds for the buffer
-        vim.api.nvim_buf_set_keymap(out_buf, "n", "q", "<cmd>q<cr>", { noremap = true })
+        vim.keymap.set( "n", "q",
+          function()
+            require("ollama-chat").cancel_all_jobs()
+            vim.cmd [[ q ]]
+          end,
+          { buffer = out_buf, noremap = true }
+        )
 
         vim.api.nvim_buf_attach(out_buf, false, {
           on_detach = function()

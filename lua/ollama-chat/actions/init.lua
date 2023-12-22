@@ -33,10 +33,11 @@ actions.chat = {
     --   out_buf,
     --   { start_ln = #pre_lines, end_ln = #pre_lines + 1 }
     -- ) -- the +1 makes sure the old spinner is replaced
-    vim.api.nvim_buf_set_lines(out_buf, #pre_lines, #pre_lines + 1, false, { "> Ollama ..." })
+    vim.api.nvim_buf_set_lines(out_buf, #pre_lines, #pre_lines + 1, false, { "*Ollama ...*" })
     -- empty line so that the response lands in the right place
     vim.api.nvim_buf_set_lines(out_buf, -1, -1, false, { "" })
     vim.cmd [[ norm G ]]
+    vim.cmd [[ w ]]
 
     ---@type Job?
     local job
@@ -69,12 +70,12 @@ actions.chat = {
       if body.done then
         -- timer:stop()
         vim.api.nvim_buf_set_lines(out_buf, #pre_lines, #pre_lines + 1, false, {
-          ("> Ollama in %ss."):format(
+          ("*Ollama in %.2f s*"):format(
             require("ollama-chat.util").nano_to_seconds(body.total_duration)
           )
         })
         vim.api.nvim_buf_set_lines(
-          out_buf, -1, -1, false, vim.split("\n\n> User\n", "\n")
+          out_buf, -1, -1, false, vim.split("\n\n*User*\n", "\n")
         )
         -- vim.api.nvim_win_set_cursor(0, { -1, 0 }) -- simpler to use norm
         vim.cmd [[ norm G ]]

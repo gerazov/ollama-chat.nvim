@@ -1,4 +1,4 @@
-#  ollama-chat.nvim 
+<img src="media/ollama-chat-nvim.png" alt="Ollama chat logo">
 > Chat with Ollama models directly in a Neovim buffer!
 
 ## Features
@@ -12,8 +12,12 @@ This is a simple plugin that allows you to chat with Ollama models:
 
 ## Usage
 
-This plugin adds the `create_chat()` function that opens a new chat buffer. The buffer is populated with a base prompt and is modifiable. 
+This plugin adds the `OllamaCreateChat` command that opens a new chat buffer. The buffer is populated with a base prompt and is modifiable. If there is a selection active it is copied in the new chat buffer as text, or within a corresponding code block if the source file type is code.
 The Ollama model can then be prompted with the chat buffer via two new prompts `Chat` and `Chat Code`, both of which send the entire buffer to the Ollama server, the difference being that `Chat Code` uses the model `model_code` set in the `opts` table.
+
+## Install
+
+First you need [Ollama](https://ollama.ai/) installed as per their instructions.
 
 To use the plugin with `lazy.nvim` you can add the file `lua/plugins/ollama-chat.lua`:
 
@@ -75,7 +79,8 @@ return {
 
 ## References
 
-The communication with Ollama is based on [ollama.nvim](https://github.com/nomnivore/ollama.nvim), refer to the README there for more information.
+- [Ollama](https://ollama.ai/)
+- communication with Ollama is based on [ollama.nvim](https://github.com/nomnivore/ollama.nvim)
 
 ## Similar plugins
 

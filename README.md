@@ -1,4 +1,4 @@
-# 󰧑 ollama-chat.nvim 
+#  ollama-chat.nvim 
 > Chat with Ollama models directly in a Neovim buffer!
 
 ## Features
@@ -75,8 +75,7 @@ return {
 
 ## References
 
-The communication with Ollama is based on [ollama.nvim](https://github.com/nomnivore/ollama.nvim). Refer to the upstream README for more information.
-
+The communication with Ollama is based on [ollama.nvim](https://github.com/nomnivore/ollama.nvim), refer to the README there for more information.
 
 ## Similar plugins
 

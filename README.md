@@ -80,8 +80,8 @@ return {
 
 ## References
 
+- [ollama.nvim](https://github.com/nomnivore/ollama.nvim) 
 - [Ollama](https://ollama.ai/)
-- communication with Ollama is based on [ollama.nvim](https://github.com/nomnivore/ollama.nvim)
 
 ## Similar plugins
 

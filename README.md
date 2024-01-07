@@ -1,4 +1,5 @@
 <img src="media/ollama-chat-nvim.png" alt="Ollama chat logo">
+
 > Chat with Ollama models directly in a Neovim buffer!
 
 ## Features

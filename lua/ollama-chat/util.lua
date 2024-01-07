@@ -1,8 +1,47 @@
-local util = {}
+local M = {}
 
----@param cb fun(body: table, job: Job?)
-function util.handle_stream(cb)
-  ---@param job Job?
+M.jobs = {}
+M.jobs_length = 0
+
+M.update_jobs_length = function()
+  M.jobs_length = 0
+  for _, _ in pairs(M.jobs) do
+    M.jobs_length = M.jobs_length + 1
+  end
+end
+
+M.add_job = function(job)
+  vim.print("adding job")
+  M.jobs[job.pid] = job
+  M.update_jobs_length()
+  vim.print(M.jobs_length .. " total jobs")
+end
+
+M.del_job = function(job)
+  vim.print("deleting job")
+  M.jobs[job.pid] = nil
+  M.update_jobs_length()
+  vim.print(M.jobs_length .. " total jobs")
+end
+
+function M.cancel_all_jobs()
+  vim.print("shutting down jobs")
+  vim.print(M.jobs_length .. " jobs remaining")
+  for _, job in pairs(M.jobs) do
+    vim.print("shutting down " .. job.pid)
+    job:shutdown()
+    vim.print(M.jobs_length .. " jobs remaining")
+  end
+end
+
+function M.status()
+  if M.jobs_length > 0 then
+    return "WORKING"
+  end
+  return "IDLE"
+end
+
+function M.handle_stream(cb)
   return function(_, chunk, job)
     vim.schedule(function()
       local _, body = pcall(function()
@@ -10,7 +49,11 @@ function util.handle_stream(cb)
       end)
       if type(body) ~= "table" or body.response == nil then
         if body.error ~= nil then
-          vim.api.nvim_notify("Error: " .. body.error, vim.log.levels.ERROR, { title = "Ollama" })
+          vim.api.nvim_notify(
+            "Error: " .. body.error,
+            vim.log.levels.ERROR,
+            { title = "Ollama" }
+          )
         end
         return
       end
@@ -19,16 +62,8 @@ function util.handle_stream(cb)
   end
 end
 
----@class Ollama.Util.ShowSpinnerOptions
----@field start_ln number? The line to start the spinner at
----@field end_ln number? The line to end the spinner at
----@field format string? The format string to use for the spinner line
-
 -- Show a spinner in the given buffer (overwrites existing lines)
----@param bufnr number The buffer to show the spinner in
----@param opts Ollama.Util.ShowSpinnerOptions? Additional options for the spinner
----@return uv_timer_t timer The timer object for rotating the spinner
-function util.show_spinner(bufnr, opts)
+function M.show_spinner(bufnr, opts)
   opts = opts or {}
   opts = vim.tbl_deep_extend("force", {
     start_ln = 0,
@@ -52,50 +87,9 @@ function util.show_spinner(bufnr, opts)
   return timer
 end
 
-function util.set_output_options(bufnr, winnr)
-  vim.api.nvim_set_option_value("filetype", "markdown", { buf = bufnr })
-  vim.api.nvim_set_option_value("buftype", "nofile", { buf = bufnr })
-  vim.api.nvim_set_option_value("wrap", true, { win = winnr })
-  vim.api.nvim_set_option_value("linebreak", true, { win = winnr })
-end
-
--- Opens a floating window with a new buffer, returning the buffer and window IDs.
----@param bufnr number The buffer to show in the window
----@param win_opts table Window option overrides to pass to nvim_open_win
----@return number buf The buffer ID
-function util.open_floating_win(bufnr, win_opts)
-  local win_width = math.floor(vim.api.nvim_get_option_value("columns", {}) * 0.8)
-  local win_height = math.floor(vim.api.nvim_get_option_value("lines", {}) * 0.8)
-
-  if win_width > 100 then
-    win_width = 100
-  end
-
-  local out_win = vim.api.nvim_open_win(
-    bufnr,
-    true,
-    vim.tbl_deep_extend("force", {
-      relative = "editor",
-      width = win_width,
-      height = win_height,
-      row = math.floor((vim.api.nvim_get_option_value("lines", {}) - win_height) / 2),
-      col = math.floor((vim.api.nvim_get_option_value("columns", {}) - win_width) / 2),
-      style = "minimal",
-      border = "rounded",
-      title = "Ollama Output",
-      title_pos = "center",
-    }, win_opts)
-  )
-
-  util.set_output_options(bufnr, out_win)
-
-  return out_win
-end
-
 -- Get the current selection range, if any, adjusting for 0-based indexing.
 -- Useful for replacing text in a buffer based on a selection range.
----@return number[]|nil { start_line, start_col, end_line, end_col }
-function util.get_selection_pos()
+function M.get_selection_pos()
   local mode = vim.api.nvim_get_mode().mode
   vim.print(mode)
   local sel_start, sel_end
@@ -155,8 +149,8 @@ function util.get_selection_pos()
 end
 
 --- Convert a nanosecond value to seconds.
-function util.nano_to_seconds(nano)
+function M.nano_to_seconds(nano)
   return nano / 1000000000
 end
 
-return util
+return M

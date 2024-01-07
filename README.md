@@ -1,8 +1,12 @@
-# ollama-chat.nvim
+# 󰧑 ollama-chat.nvim 
+> Chat with Ollama models directly in a Neovim buffer!
 
-This is a fork of [ollama.nvim](https://github.com/nomnivore/ollama.nvim) with added chat functionality.
+## Features
 
-The chat functionality is pretty bare-bones, and is meant to serve it's purpose temporarily, until chat gets implemented within `ollama.nvim`.  
+This is a simple plugin that allows you to chat with Ollama models:
+- no UI to get in the way - the chat works in a normal Neovim buffer, 
+- chat history is completely modifiable - the whole conversation is sent to the model with each new prompt,
+- populate new chat buffer with text/code selection.
 
 ![ollama chat](https://github.com/nomnivore/ollama.nvim/assets/15214418/8070342e-74d2-4086-afed-6835d954aeb2)
 
@@ -21,57 +25,36 @@ return {
     "stevearc/dressing.nvim",
   },
 
-  -- All the user commands added by the plugin
-  cmd = { "Ollama", "OllamaModel", "OllamaServe", "OllamaServeStop" },
+  -- lazy load on command
+  cmd = {
+      "OllamaCreateChat",
+      "OllamaChat",
+      "OllamaChatCode",
+      "OllamaModel",
+      "OllamaServe",
+      "OllamaServeStop"
+  },
 
   keys = {
     {
       "<leader>occ",
-      function() require('ollama-chat').create_chat() end,
+      function() require('ollama-chat.chat').create_chat() end,
       desc = "Create Ollama Chat",
       mode = { "n", "x" },
       silent = true,
     },
     {
       "<leader>och",
-      function() require('ollama-chat').prompt('Chat') end,
+      function() require('ollama-chat.chat').prompt('Chat') end,
       desc = "Chat",
       mode = { "n" },
       silent = true,
     },
     {
       "<leader>ocd",
-      function() require('ollama-chat').prompt('Chat_code') end,
+      function() require('ollama-chat.chat').prompt('Chat_code') end,
       desc = "Chat Code",
       mode = { "n" },
-      silent = true,
-    },
-    {
-      "<leader>opp",
-      ":<c-u>lua require('ollama-chat').prompt()<cr>",
-      desc = "ollama prompt",
-      mode = { "n", "x" },
-      silent = true,
-    },
-    {
-      "<leader>opi",
-      function() require('ollama-chat').prompt('Ask') end,
-      desc = "ollama prompt",
-      mode = { "n" },
-      silent = true,
-    },
-    {
-      "<leader>ops",
-      function() require('ollama-chat').prompt('Synonyms') end,
-      desc = "ollama prompt",
-      mode = { "n", "v" },
-      silent = true,
-    },
-    {
-      "<leader>opd",
-      function() require('ollama-chat').prompt('Define') end,
-      desc = "ollama prompt",
-      mode = { "n", "v" },
       silent = true,
     },
   },
@@ -89,9 +72,15 @@ return {
       },
     }
 ```
-\* Note that to have selections to work when picking a prompt with prompt picker, i.e. when calling `prompt()` without arguments, you have to map it using `:<c-u>` so that the mode changes from visual to normal and the `'<` and `'>` marks get created. 
 
-This is not important when mapping selection based prompts directly, i.e. you can use `:<c-u>` or `<cmd>` or a lua function as shown here.
-On the other hand, creating the chat needs to be called from visual mode, as it triggers the copying of the selection to the chat buffer.
+## References
 
-Refer to the upstream [ollama.nvim](https://github.com/nomnivore/ollama.nvim) README for more information.
+The communication with Ollama is based on [ollama.nvim](https://github.com/nomnivore/ollama.nvim). Refer to the upstream README for more information.
+
+
+## Similar plugins
+
+- [model.nvim](https://github.com/gsuuon/model.nvim)
+- [ollama.nvim](https://github.com/nomnivore/ollama.nvim)
+- [gen.nvim](https://github.com/David-Kunz/gen.nvim)
+- [nvim-llama](https://github.com/jpmcb/nvim-llama)

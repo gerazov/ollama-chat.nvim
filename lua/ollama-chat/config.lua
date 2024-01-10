@@ -18,7 +18,6 @@ M.opts = {}
 
 function M.update_opts(opts)
   M.opts = vim.tbl_deep_extend("force", M.default_opts, opts or {})
-  print("updated opts")
 end
 
 

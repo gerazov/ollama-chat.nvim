@@ -85,7 +85,7 @@ function M.create_chat()
       M.cancel_all_jobs()
       vim.cmd [[ bd! ]]
     end,
-    { buffer = out_buf, noremap = true, desc = "QuitOllama* chat" }
+    { buffer = out_buf, noremap = true, desc = "Quit Ollama chat" }
   )
   vim.cmd [[ normal G ]]
   vim.cmd [[w!]]  --overwrite file if exists TODO manage chats in an ollama folder
@@ -108,7 +108,7 @@ M.chat = {
     vim.api.nvim_buf_set_lines(out_buf, #pre_lines, #pre_lines + 1, false, { "*Ollama ...*" })
     -- empty line so that the response lands in the right place
     vim.api.nvim_buf_set_lines(out_buf, -1, -1, false, { "" })
-    vim.cmd [[ norm G ]]
+    vim.cmd [[ norm Gzz ]]
     vim.cmd [[ w ]]
 
     local job

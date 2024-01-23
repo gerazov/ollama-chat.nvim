@@ -114,7 +114,6 @@ function M.create_chat(chat_type)
         hl_opts = hl_opts .. " " .. k .. "=" .. v
       end
     end
-    vim.print(hl_opts)
     if hl_opts ~= "" then
       -- vim.cmd [[ hi @text.emphasis ]]  -- clear existing highlight
       vim.cmd("hi @text.emphasis " .. hl_opts)
@@ -136,7 +135,9 @@ function M.create_chat(chat_type)
   vim.keymap.set(
     "n", "q",
     function()
-      util.cancel_all_jobs(M.timer, M.bufnr, M.spinner_line)
+      if util.jobs_length > 0 then
+        util.cancel_all_jobs(M.timer, M.bufnr, M.spinner_line)
+      end
       vim.api.nvim_buf_set_lines(M.bufnr, -1, -1, false, { "", "*User*" })
       vim.cmd [[ normal Go ]]
     end,
@@ -145,7 +146,9 @@ function M.create_chat(chat_type)
   vim.keymap.set(
     "n", "<leader>q",
     function()
-      util.cancel_all_jobs(M.timer, M.bufnr, M.spinner_line)
+      if util.jobs_length > 0 then
+        util.cancel_all_jobs(M.timer, M.bufnr, M.spinner_line)
+      end
       vim.cmd [[ bd! ]]
     end,
     { buffer = M.bufnr, noremap = true, desc = "Quit Ollama chat" }

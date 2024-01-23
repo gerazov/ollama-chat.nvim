@@ -5,7 +5,6 @@ local M = {}
 
 function M.run_serve(opts)
   local ollama_chat_opts = require("ollama-chat.config").opts
-  vim.print("running serve")
   opts = opts or {}
   local serve_job = require("plenary.job"):new({
     command = ollama_chat_opts.serve.command,
@@ -38,7 +37,6 @@ end
 
 function M.stop_serve(opts)
   local ollama_chat_opts = require("ollama-chat.config").opts
-  vim.print("stopping serve")
   opts = opts or {}
   require("plenary.job")
     :new({
@@ -175,7 +173,11 @@ function M.prompt(name)
     end,
   })
   job:add_on_exit_callback(function(j)
-    vim.print(job.pid .. " job exited")
+    vim.schedule_wrap(vim.api.nvim_notify)(
+      job.pid ..  " Ollama job exited",
+      vim.log.levels.INFO,
+      { title = "Ollama" }
+    )
     if stream_called then
       return
     end

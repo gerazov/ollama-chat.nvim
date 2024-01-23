@@ -11,28 +11,62 @@ M.update_jobs_length = function()
 end
 
 M.add_job = function(job)
-  vim.print("adding job")
+  vim.schedule_wrap(vim.api.nvim_notify)(
+    "Creating Ollama job",
+    vim.log.levels.INFO,
+    { title = "Ollama" }
+  )
   M.jobs[job.pid] = job
   M.update_jobs_length()
-  vim.print(M.jobs_length .. " total jobs")
+  vim.schedule_wrap(vim.api.nvim_notify)(
+    M.jobs_length ..  " Ollama jobs in total",
+    vim.log.levels.INFO,
+    { title = "Ollama" }
+  )
 end
 
 M.del_job = function(job)
-  vim.print("deleting job")
+  vim.schedule_wrap(vim.api.nvim_notify)(
+    "Deleting Ollama job",
+    vim.log.levels.INFO,
+    { title = "Ollama" }
+  )
   M.jobs[job.pid] = nil
   M.update_jobs_length()
-  vim.print(M.jobs_length .. " total jobs")
+  vim.schedule_wrap(vim.api.nvim_notify)(
+    M.jobs_length ..  " Ollama jobs in total",
+    vim.log.levels.INFO,
+    { title = "Ollama" }
+  )
 end
 
 function M.cancel_all_jobs(timer, bufnr, spinner_line)
-  vim.print("shutting down jobs")
-  vim.print(M.jobs_length .. " jobs remaining")
+  vim.schedule_wrap(vim.api.nvim_notify)(
+    "Shutting down Ollama jobs",
+    vim.log.levels.INFO,
+    { title = "Ollama" }
+  )
+  vim.schedule_wrap(vim.api.nvim_notify)(
+    M.jobs_length ..  " Ollama jobs in total",
+    vim.log.levels.INFO,
+    { title = "Ollama" }
+  )
+  if M.jobs_length == 0 then
+    return
+  end
   for _, job in pairs(M.jobs) do
-    vim.print("shutting down " .. job.pid)
+    vim.schedule_wrap(vim.api.nvim_notify)(
+      "Shutting down Ollama job " .. job.pid,
+      vim.log.levels.INFO,
+      { title = "Ollama" }
+    )
     timer:stop()
     job:shutdown()
-    vim.print(M.jobs_length .. " jobs remaining")
-  end
+    vim.schedule_wrap(vim.api.nvim_notify)(
+      M.jobs_length ..  " Ollama jobs remaining",
+      vim.log.levels.INFO,
+      { title = "Ollama" }
+    )end
   vim.api.nvim_buf_set_lines(bufnr, spinner_line, spinner_line + 1, false, { "*Ollama cancelled*" })
 end
 
@@ -93,7 +127,6 @@ end
 -- Useful for replacing text in a buffer based on a selection range.
 function M.get_selection_pos()
   local mode = vim.api.nvim_get_mode().mode
-  vim.print(mode)
   local sel_start, sel_end
   if mode == "n" then
     print("using < and >")
@@ -105,8 +138,6 @@ function M.get_selection_pos()
     sel_start = vim.fn.getpos("v")
     sel_end = vim.fn.getpos(".")
   end
-  vim.print(sel_start)
-  vim.print(sel_end)
 
   if
     sel_start == nil

@@ -1,5 +1,11 @@
 local opts = require("ollama-chat.config").opts
+local util = require("ollama-chat.util")
+
 local M = {}
+M.timer = nil
+M.spinner_line = nil
+M.bufnr = nil
+M.winnr = nil
 
 M.parse_prompt = function(prompt)
   local text = prompt.prompt
@@ -48,15 +54,15 @@ function M.create_chat()
       sel_text_str = "\n```" .. filetype .. "\n" .. sel_text_str .. "\n```\n"
     end
   end
-  local out_buf = vim.api.nvim_create_buf(true, false)  -- create a normal buffer
-  local out_win = vim.api.nvim_get_current_win()
+  M.bufnr = vim.api.nvim_create_buf(true, false)  -- create a normal buffer
+  M.winnr = vim.api.nvim_get_current_win()
 
-  vim.api.nvim_set_current_buf(out_buf)
-  vim.api.nvim_buf_set_name(out_buf, "/tmp/ollama-chat.md")
-  vim.api.nvim_set_option_value("filetype", "markdown", { buf = out_buf })
-  vim.api.nvim_set_option_value("conceallevel", 1, { buf = out_buf })
-  vim.api.nvim_set_option_value("wrap", true, { win = out_win })
-  vim.api.nvim_set_option_value("linebreak", true, { win = out_win })
+  vim.api.nvim_set_current_buf(M.bufnr)
+  vim.api.nvim_buf_set_name(M.bufnr, "/tmp/ollama-chat.md")
+  vim.api.nvim_set_option_value("filetype", "markdown", { buf = M.bufnr })
+  vim.api.nvim_set_option_value("conceallevel", 1, { buf = M.bufnr })
+  vim.api.nvim_set_option_value("wrap", true, { win = M.winnr })
+  vim.api.nvim_set_option_value("linebreak", true, { win = M.winnr })
 
   local pre_text = "You are an AI agent *Ollama* that is helping the *User* "
   .. "with his queries. The *User* enters their prompts after lines beginning "
@@ -67,57 +73,59 @@ function M.create_chat()
   pre_text = pre_text .. sel_text_str .. "\n" .. "\n*User*\n"
   local pre_lines = vim.split(pre_text, "\n")
 
-  vim.api.nvim_buf_set_lines(out_buf, 0, -1, false, pre_lines)
+  vim.api.nvim_buf_set_lines(M.bufnr, 0, -1, false, pre_lines)
   vim.api.nvim_win_set_cursor(0, { #pre_lines, 0 })
-  -- vim.api.nvim_buf_set_keymap(out_buf, "n", "q", "<cmd>bd!<cr>", { noremap = true })
+  -- vim.api.nvim_buf_set_keymap(M.bufnr, "n", "q", "<cmd>bd!<cr>", { noremap = true })
   vim.keymap.set(
     "n", "q",
     function()
-      M.cancel_all_jobs()
+      util.cancel_all_jobs(M.timer, M.bufnr, M.spinner_line)
       vim.cmd [[ normal Go*User* ]]
-      vim.cmd [[ normal Go ]]
+      vim.cmd [[ normal o ]]
     end,
-    { buffer = out_buf, noremap = true, desc = "Stop generating" }
+    { buffer = M.bufnr, noremap = true, desc = "Stop generating" }
   )
   vim.keymap.set(
     "n", "<leader>q",
     function()
-      M.cancel_all_jobs()
+      util.cancel_all_jobs(M.timer, M.bufnr, M.spinner_line)
       vim.cmd [[ bd! ]]
     end,
-    { buffer = out_buf, noremap = true, desc = "Quit Ollama chat" }
+    { buffer = M.bufnr, noremap = true, desc = "Quit Ollama chat" }
   )
   vim.cmd [[ normal G ]]
   vim.cmd [[w!]]  --overwrite file if exists TODO manage chats in an ollama folder
-  -- vim.api.nvim_buf_attach(out_buf, false, {
+  -- vim.api.nvim_buf_attach(M.bufnr, false, {
   --   on_detach = M.cancel_all_jobs(),
   -- })
 end
 
 M.chat = {
   fn = function()
-    local out_buf = vim.api.nvim_get_current_buf()
+    M.bufnr = vim.api.nvim_get_current_buf()
     vim.cmd [[ norm Go ]]
-    local pre_lines = vim.api.nvim_buf_get_lines(out_buf, 0, -1, false)
+    local pre_lines = vim.api.nvim_buf_get_lines(M.bufnr, 0, -1, false)
     local tokens = {}
     -- show a rotating spinner while waiting for the response
-    -- local timer = require("ollama-chat.util").show_spinner(
-    --   out_buf,
-    --   { start_ln = #pre_lines, end_ln = #pre_lines + 1 }
-    -- ) -- the +1 makes sure the old spinner is replaced
-    vim.api.nvim_buf_set_lines(out_buf, #pre_lines, #pre_lines + 1, false, { "*Ollama ...*" })
+    M.spinner_line = #pre_lines
+    M.timer = util.show_spinner(
+      M.bufnr,
+      { start_ln = #pre_lines, end_ln = #pre_lines + 1 }
+    ) -- the +1 makes sure the old spinner is replaced
+    vim.api.nvim_buf_set_lines(M.bufnr, #pre_lines, #pre_lines + 1, false, { "*Ollama ...*" })
     -- empty line so that the response lands in the right place
-    vim.api.nvim_buf_set_lines(out_buf, -1, -1, false, { "" })
+    vim.api.nvim_buf_set_lines(M.bufnr, -1, -1, false, { "" })
     vim.cmd [[ norm Gzz ]]
     vim.cmd [[ w ]]
 
     local job
     local is_cancelled = false
-    vim.api.nvim_buf_attach(out_buf, false, {
+    vim.api.nvim_buf_attach(M.bufnr, false, {
       -- this doesn't work - on bd, the job is still running
       on_detach = function()
         if job ~= nil then
           is_cancelled = true
+          M.timer:stop()
           job:shutdown()
         end
       end,
@@ -128,24 +136,24 @@ M.chat = {
       -- if job == nil then
         job = _job
         if is_cancelled then
-          -- timer:stop()
+          M.timer:stop()
           job:shutdown()
         end
       end
       table.insert(tokens, body.response)
       vim.api.nvim_buf_set_lines(
-        out_buf, #pre_lines + 1, -1, false, vim.split(table.concat(tokens), "\n")
+        M.bufnr, #pre_lines + 1, -1, false, vim.split(table.concat(tokens), "\n")
       )
 
       if body.done then
-        -- timer:stop()
-        vim.api.nvim_buf_set_lines(out_buf, #pre_lines, #pre_lines + 1, false, {
+        M.timer:stop()
+        vim.api.nvim_buf_set_lines(M.bufnr, #pre_lines, #pre_lines + 1, false, {
           ("*Ollama in %.2f s*"):format(
             require("ollama-chat.util").nano_to_seconds(body.total_duration)
           )
         })
         vim.api.nvim_buf_set_lines(
-          out_buf, -1, -1, false, vim.split("\n\n*User*\n", "\n")
+          M.bufnr, -1, -1, false, vim.split("\n\n*User*\n", "\n")
         )
         -- vim.api.nvim_win_set_cursor(0, { -1, 0 }) -- simpler to use norm
         vim.cmd [[ norm G ]]

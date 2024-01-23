@@ -24,14 +24,16 @@ M.del_job = function(job)
   vim.print(M.jobs_length .. " total jobs")
 end
 
-function M.cancel_all_jobs()
+function M.cancel_all_jobs(timer, bufnr, spinner_line)
   vim.print("shutting down jobs")
   vim.print(M.jobs_length .. " jobs remaining")
   for _, job in pairs(M.jobs) do
     vim.print("shutting down " .. job.pid)
+    timer:stop()
     job:shutdown()
     vim.print(M.jobs_length .. " jobs remaining")
   end
+  vim.api.nvim_buf_set_lines(bufnr, spinner_line, spinner_line + 1, false, { "*Ollama cancelled*" })
 end
 
 function M.status()

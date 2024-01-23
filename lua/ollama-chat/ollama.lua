@@ -173,11 +173,13 @@ function M.prompt(name)
     end,
   })
   job:add_on_exit_callback(function(j)
-    vim.schedule_wrap(vim.api.nvim_notify)(
-      job.pid ..  " Ollama job exited",
-      vim.log.levels.INFO,
-      { title = "Ollama" }
-    )
+    if ollama_chat_opts.debug then
+      vim.schedule_wrap(vim.api.nvim_notify)(
+        job.pid ..  " Ollama job exited",
+        vim.log.levels.INFO,
+        { title = "Ollama" }
+      )
+    end
     if stream_called then
       return
     end

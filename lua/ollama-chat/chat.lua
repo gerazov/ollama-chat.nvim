@@ -179,12 +179,12 @@ M.chat = {
     vim.cmd [[ w ]]
 
     local job
-    local is_cancelled = false
+    local is_canceled = false
     vim.api.nvim_buf_attach(M.bufnr, false, {
       -- this doesn't work - on bd, the job is still running
       on_detach = function()
         if job ~= nil then
-          is_cancelled = true
+          is_canceled = true
           M.timer:stop()
           job:shutdown()
         end
@@ -195,7 +195,7 @@ M.chat = {
       if job == nil and _job ~= nil then
       -- if job == nil then
         job = _job
-        if is_cancelled then
+        if is_canceled then
           M.timer:stop()
           job:shutdown()
         end

@@ -11,63 +11,82 @@ M.update_jobs_length = function()
 end
 
 M.add_job = function(job)
-  vim.schedule_wrap(vim.api.nvim_notify)(
-    "Creating Ollama job",
-    vim.log.levels.INFO,
-    { title = "Ollama" }
-  )
+  local opts = require("ollama-chat.config").opts
+  if opts.debug then
+    vim.schedule_wrap(vim.api.nvim_notify)(
+      "Creating Ollama job",
+      vim.log.levels.INFO,
+      { title = "Ollama" }
+    )
+  end
   M.jobs[job.pid] = job
   M.update_jobs_length()
-  vim.schedule_wrap(vim.api.nvim_notify)(
-    M.jobs_length ..  " Ollama jobs in total",
-    vim.log.levels.INFO,
-    { title = "Ollama" }
-  )
+  if opts.debug then
+    vim.schedule_wrap(vim.api.nvim_notify)(
+      M.jobs_length ..  " Ollama jobs in total",
+      vim.log.levels.INFO,
+      { title = "Ollama" }
+    )
+  end
 end
 
 M.del_job = function(job)
-  vim.schedule_wrap(vim.api.nvim_notify)(
-    "Deleting Ollama job",
-    vim.log.levels.INFO,
-    { title = "Ollama" }
-  )
+  local opts = require("ollama-chat.config").opts
+  if opts.debug then
+    vim.schedule_wrap(vim.api.nvim_notify)(
+      "Deleting Ollama job",
+      vim.log.levels.INFO,
+      { title = "Ollama" }
+    )
+  end
   M.jobs[job.pid] = nil
   M.update_jobs_length()
-  vim.schedule_wrap(vim.api.nvim_notify)(
-    M.jobs_length ..  " Ollama jobs in total",
-    vim.log.levels.INFO,
-    { title = "Ollama" }
-  )
+  if opts.debug then
+    vim.schedule_wrap(vim.api.nvim_notify)(
+      M.jobs_length ..  " Ollama jobs in total",
+      vim.log.levels.INFO,
+      { title = "Ollama" }
+    )
+  end
 end
 
 function M.cancel_all_jobs(timer, bufnr, spinner_line)
-  vim.schedule_wrap(vim.api.nvim_notify)(
-    "Shutting down Ollama jobs",
-    vim.log.levels.INFO,
-    { title = "Ollama" }
-  )
-  vim.schedule_wrap(vim.api.nvim_notify)(
-    M.jobs_length ..  " Ollama jobs in total",
-    vim.log.levels.INFO,
-    { title = "Ollama" }
-  )
+  local opts = require("ollama-chat.config").opts
+  if opts.debug then
+    vim.schedule_wrap(vim.api.nvim_notify)(
+      "Shutting down Ollama jobs",
+      vim.log.levels.INFO,
+      { title = "Ollama" }
+    )
+  end
+  if opts.debug then
+    vim.schedule_wrap(vim.api.nvim_notify)(
+      M.jobs_length ..  " Ollama jobs in total",
+      vim.log.levels.INFO,
+      { title = "Ollama" }
+    )
+  end
   if M.jobs_length == 0 then
     return
   end
   for _, job in pairs(M.jobs) do
-    vim.schedule_wrap(vim.api.nvim_notify)(
-      "Shutting down Ollama job " .. job.pid,
-      vim.log.levels.INFO,
-      { title = "Ollama" }
-    )
+    if opts.debug then
+      vim.schedule_wrap(vim.api.nvim_notify)(
+        "Shutting down Ollama job " .. job.pid,
+        vim.log.levels.INFO,
+        { title = "Ollama" }
+      )
+    end
     timer:stop()
     job:shutdown()
-    vim.schedule_wrap(vim.api.nvim_notify)(
-      M.jobs_length ..  " Ollama jobs remaining",
-      vim.log.levels.INFO,
-      { title = "Ollama" }
-    )end
-  vim.api.nvim_buf_set_lines(bufnr, spinner_line, spinner_line + 1, false, { "*Ollama cancelled*" })
+    if opts.debug then
+      vim.schedule_wrap(vim.api.nvim_notify)(
+        M.jobs_length ..  " Ollama jobs remaining",
+        vim.log.levels.INFO,
+        { title = "Ollama" }
+      )end
+  end
+  vim.api.nvim_buf_set_lines(bufnr, spinner_line, spinner_line + 1, false, { "*Ollama canceled*" })
 end
 
 function M.status()

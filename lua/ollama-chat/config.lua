@@ -17,6 +17,7 @@ M.default_opts = {
   },
   highlight = {
   },
+  debug = false,
 }
 
 M.opts = {}

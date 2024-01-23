@@ -106,26 +106,20 @@ function M.create_chat(chat_type)
   vim.api.nvim_set_option_value("conceallevel", 1, { buf = M.bufnr })
   vim.api.nvim_set_option_value("wrap", true, { win = M.winnr })
   vim.api.nvim_set_option_value("linebreak", true, { win = M.winnr })
-  -- set highlighting if option is not nil
-  if opts.highlight ~= nil then
-    local hl_opts = ""
-    for k, v in pairs(opts.highlight) do
-      if v ~= nil then
-        hl_opts = hl_opts .. " " .. k .. "=" .. v
-      end
-    end
-    if hl_opts ~= "" then
-      -- vim.cmd [[ hi @text.emphasis ]]  -- clear existing highlight
-      vim.cmd("hi @text.emphasis " .. hl_opts)
-    end
-  end
 
-  local pre_text = "You are an AI agent *Ollama* that is helping the *User* "
-  .. "with his queries. The *User* enters their prompts after lines beginning "
-  .. "with '*User*'.\n"
-  .. "Your answers start at lines beginning with '*Ollama*'.\n"
-  .. "You should output only responses and not the special sequences '*User*' "
-  .. "and '*Ollama*'.\n"
+  -- if chat type is quick or new populate the buffer
+  local pre_text = ""
+  if chat_type == "new" or chat_type == "quick" then
+    pre_text = "You are an AI agent *Ollama* that is helping the *User* "
+    .. "with his queries. The *User* enters their prompts after lines beginning "
+    .. "with '*User*'.\n"
+    .. "Your answers start at lines beginning with '*Ollama*'.\n"
+    .. "You should output only responses and not the special sequences '*User*' "
+    .. "and '*Ollama*'.\n"
+  else
+    -- existing text is pre_text
+    pre_text = table.concat(vim.api.nvim_buf_get_lines(M.bufnr, 0, -1, false), "\n")
+  end
   pre_text = pre_text .. sel_text_str .. "\n" .. "\n*User*\n"
   local pre_lines = vim.split(pre_text, "\n")
 
@@ -153,6 +147,19 @@ function M.create_chat(chat_type)
     end,
     { buffer = M.bufnr, noremap = true, desc = "Quit Ollama chat" }
   )
+  -- set highlighting if option is not nil
+  if opts.highlight ~= nil then
+    local hl_opts = ""
+    for k, v in pairs(opts.highlight) do
+      if v ~= nil then
+        hl_opts = hl_opts .. " " .. k .. "=" .. v
+      end
+    end
+    if hl_opts ~= "" then
+      -- vim.cmd [[ hi @text.emphasis ]]  -- clear existing highlight
+      vim.cmd("hi @text.emphasis " .. hl_opts)
+    end
+  end
   vim.cmd [[ normal G ]]
   vim.cmd [[w!]]  --overwrite file if exists TODO manage chats in an ollama folder
   -- vim.api.nvim_buf_attach(M.bufnr, false, {

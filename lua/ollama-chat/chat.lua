@@ -9,20 +9,8 @@ M.winnr = nil
 M.folder = nil
 M.filename = nil
 
-M.parse_prompt = function(prompt)
-  local text = prompt.prompt
-
-  if text:find("$buf") then
-    local buf_text = vim.api.nvim_buf_get_lines(0, 0, -1, false)
-    text = text:gsub("$buf", table.concat(buf_text, "\n"))
-  end
-
-  return text
-end
-
---- create new chat buffer and window
-function M.create_chat(chat_type)
-  chat_type = chat_type or "quick"
+M.update_prompts = function()
+  -- so that the user opts can override the default opts
   local opts = require("ollama-chat.config").opts
   M.prompts = {
     Chat = {
@@ -37,12 +25,31 @@ function M.create_chat(chat_type)
       model = opts.model_code,
     },
   }
+end
+
+M.parse_prompt = function(prompt)
+  local text = prompt.prompt
+
+  if text:find("$buf") then
+    local buf_text = vim.api.nvim_buf_get_lines(0, 0, -1, false)
+    text = text:gsub("$buf", table.concat(buf_text, "\n"))
+  end
+
+  return text
+end
+
+M.sel_text_str = ""
+M.chat_type = nil
+
+--- create new chat buffer and window
+function M.create_chat(chat_type)
+  local opts = require("ollama-chat.config").opts
+  M.chat_type = chat_type or "quick"
   local filetype = vim.bo.filetype
   local cur_buf = vim.api.nvim_get_current_buf()
   -- if spawned from visual mode copy selection to chat buffer
   local mode = vim.api.nvim_get_mode().mode
   local visual_modes = { "v", "V", "" }
-  local sel_text_str = ""
   if vim.tbl_contains(visual_modes, mode) then
     local sel_range = require("ollama-chat.util").get_selection_pos()
 
@@ -50,11 +57,11 @@ function M.create_chat(chat_type)
       cur_buf, sel_range[1], sel_range[2], sel_range[3], sel_range[4],
       {}
     )
-    sel_text_str = table.concat(sel_text, "\n")
+    M.sel_text_str = table.concat(sel_text, "\n")
     -- if filetype is not text, markdown or latex then wratp in code block
     local noncode_filetypes = { "text", "markdown", "org", "mail", "latex" }
     if filetype == nil or not vim.tbl_contains(noncode_filetypes, filetype) then
-      sel_text_str = "\n```" .. filetype .. "\n" .. sel_text_str .. "\n```\n"
+      M.sel_text_str = "\n```" .. filetype .. "\n" .. M.sel_text_str .. "\n```\n"
     end
   end
   M.winnr = vim.api.nvim_get_current_win()
@@ -83,7 +90,7 @@ function M.create_chat(chat_type)
     --   hidden = false,
     --   search_file = "*.md",
     -- })
-    M.find_files(opts, chat_type, sel_text_str)
+    M.find_files(opts, chat_type)
     -- TODO find a way to set all the options for the opened file
     return
 
@@ -99,13 +106,15 @@ function M.create_chat(chat_type)
     vim.api.nvim_set_current_buf(M.bufnr)
   end
   if chat_type == "new" or chat_type == "quick" then
-    M.setup_chat_buffer(opts, chat_type, sel_text_str)
+    M.setup_chat_buffer()
   end
 end
 
-M.setup_chat_buffer = function(opts, chat_type, sel_text_str)
+M.setup_chat_buffer = function()
+  local opts = require("ollama-chat.config").opts
   M.bufnr = vim.api.nvim_get_current_buf()
   M.winnr = vim.api.nvim_get_current_win()
+  vim.b.ollama_chat = true
   vim.api.nvim_set_option_value("filetype", "markdown", { buf = M.bufnr })
   vim.api.nvim_set_option_value("conceallevel", 1, { buf = M.bufnr })
   vim.api.nvim_set_option_value("wrap", true, { win = M.winnr })
@@ -113,7 +122,7 @@ M.setup_chat_buffer = function(opts, chat_type, sel_text_str)
 
   -- if chat type is quick or new populate the buffer
   local pre_text = ""
-  if chat_type == "new" or chat_type == "quick" then
+  if M.chat_type == "new" or M.chat_type == "quick" then
     pre_text = "You are an AI agent *Ollama* that is helping the *User* "
     .. "with his queries. The *User* enters their prompts after lines beginning "
     .. "with '*User*'.\n"
@@ -124,7 +133,7 @@ M.setup_chat_buffer = function(opts, chat_type, sel_text_str)
     -- existing text is pre_text
     pre_text = table.concat(vim.api.nvim_buf_get_lines(M.bufnr, 0, -1, false), "\n")
   end
-  pre_text = pre_text .. sel_text_str .. "\n" .. "\n*User*\n"
+  pre_text = pre_text .. M.sel_text_str .. "\n" .. "\n*User*\n"
   local pre_lines = vim.split(pre_text, "\n")
 
   vim.api.nvim_buf_set_lines(M.bufnr, 0, -1, false, pre_lines)
@@ -174,6 +183,14 @@ end
 
 M.chat = {
   fn = function()
+    if vim.b.ollama_chat == nil or vim.b.ollama_chat == false then
+      vim.api.nvim_notify(
+        "Setting up buffer for Ollama chat.",
+        vim.log.levels.INFO,
+        { title = "Ollama" }
+      )
+      M.setup_chat_buffer()
+    end
     M.bufnr = vim.api.nvim_get_current_buf()
     vim.cmd [[ norm Go ]]
     local pre_lines = vim.api.nvim_buf_get_lines(M.bufnr, 0, -1, false)
@@ -245,7 +262,7 @@ M.chat = {
 }
 
 -- spcify Telescope function to return the name of the file selected
-M.find_files = function(opts, chat_type, sel_text_str)
+M.find_files = function(opts, chat_type)
   local telescope_opts = {
     attach_mappings = function(_, map)
       map("i", "<CR>", function(prompt_bufnr)
@@ -256,7 +273,7 @@ M.find_files = function(opts, chat_type, sel_text_str)
         local filename = chat_entry[1]
         local open_file_cmd =  "e " .. opts.chats_folder .. "/" .. filename
         vim.cmd(open_file_cmd)
-        M.setup_chat_buffer(opts, chat_type, sel_text_str)
+        M.setup_chat_buffer(chat_type)
       end)
 
       return true

@@ -1,4 +1,3 @@
-local opts = require("ollama-chat.config").opts
 local util = require("ollama-chat.util")
 
 local M = {}
@@ -18,22 +17,22 @@ M.parse_prompt = function(prompt)
   return text
 end
 
-M.prompts = {
-  Chat = {
-    prompt = "$buf\n",
-    action = "chat",
-    model = opts.model,
-  },
-
-  Chat_code = {
-    prompt = "$buf\n",
-    action = "chat",
-    model = opts.model_code,
-  },
-}
---
 --- create new chat buffer and window
 function M.create_chat()
+  local opts = require("ollama-chat.config").opts
+  M.prompts = {
+    Chat = {
+      prompt = "$buf\n",
+      action = "chat",
+      model = opts.model,
+    },
+
+    Chat_code = {
+      prompt = "$buf\n",
+      action = "chat",
+      model = opts.model_code,
+    },
+  }
   local filetype = vim.bo.filetype
   local cur_buf = vim.api.nvim_get_current_buf()
   -- if spawned from visual mode copy selection to chat buffer
@@ -58,7 +57,14 @@ function M.create_chat()
   M.winnr = vim.api.nvim_get_current_win()
 
   vim.api.nvim_set_current_buf(M.bufnr)
-  vim.api.nvim_buf_set_name(M.bufnr, "/tmp/ollama-chat.md")
+  vim.print(opts.chats_folder)
+  if opts.chats_folder == "current" then
+    vim.api.nvim_buf_set_name(M.bufnr, vim.fn.expand("%:p:h") .. "/" .. opts.default_chat_file)
+  elseif opts.chats_folder == "tmp" then
+    vim.api.nvim_buf_set_name(M.bufnr, "/tmp/" .. opts.default_chat_file)
+  else
+    vim.api.nvim_buf_set_name(M.bufnr, opts.chats_folder .. "/" .. opts.default_chat_file)
+  end
   vim.api.nvim_set_option_value("filetype", "markdown", { buf = M.bufnr })
   vim.api.nvim_set_option_value("conceallevel", 1, { buf = M.bufnr })
   vim.api.nvim_set_option_value("wrap", true, { win = M.winnr })

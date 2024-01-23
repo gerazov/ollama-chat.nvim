@@ -7,7 +7,7 @@ M.default_opts = {
   prompts = {},  -- generated in setup
   chats_folder = vim.fn.stdpath("data"), -- data folder is ~/.local/share/nvim
   -- can be "current" and "tmp"
-  default_chat_file = "ollama-chat.md",
+  quick_chat_file = "ollama-chat.md",
   serve = {
     on_start = false,
     command = "ollama",

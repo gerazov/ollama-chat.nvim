@@ -8,19 +8,41 @@ function M.setup(opts)
   config.update_opts(opts)
 
   vim.api.nvim_create_user_command(
-    "OllamaCreateChat",  -- TODO finish this
+    "OllamaCreateNewChat",
     function()
-      print("creating chat")
-      chat.create_chat()
+      print("creating new chat")
+      chat.create_chat("new")
     end,
     {
-      desc = "Create Ollama Chat buffer",
+      desc = "Create Ollama Chat",
+    }
+  )
+
+  vim.api.nvim_create_user_command(
+    "OllamaQuickChat",
+    function()
+      print("creating quick chat")
+      chat.create_chat("quick")
+    end,
+    {
+      desc = "Ollama Quick Chat",
+    }
+  )
+
+  vim.api.nvim_create_user_command(
+    "OllamaContinueChat",
+    function()
+      print("continuing chat")
+      chat.create_chat("continue")
+    end,
+    {
+      desc = "Continue Ollama Chat",
     }
   )
 
   vim.api.nvim_create_user_command(
     "OllamaChat",  -- TODO finish this
-    function() chat.prompt("Chat") end,
+    function() ollama.prompt("Chat") end,
     {
       desc = "Send chat to Ollama server",
     }
@@ -28,7 +50,7 @@ function M.setup(opts)
 
   vim.api.nvim_create_user_command(
     "OllamaChatCode",  -- TODO finish this
-    function() chat.prompt("Chat_code") end,
+    function() ollama.prompt("Chat_code") end,
     {
       desc = "Send chat to Ollama server",
     }

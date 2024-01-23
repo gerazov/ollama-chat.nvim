@@ -10,7 +10,6 @@ function M.setup(opts)
   vim.api.nvim_create_user_command(
     "OllamaCreateNewChat",
     function()
-      print("creating new chat")
       chat.create_chat("new")
     end,
     {
@@ -21,7 +20,6 @@ function M.setup(opts)
   vim.api.nvim_create_user_command(
     "OllamaQuickChat",
     function()
-      print("creating quick chat")
       chat.create_chat("quick")
     end,
     {
@@ -32,7 +30,6 @@ function M.setup(opts)
   vim.api.nvim_create_user_command(
     "OllamaContinueChat",
     function()
-      print("continuing chat")
       chat.create_chat("continue")
     end,
     {

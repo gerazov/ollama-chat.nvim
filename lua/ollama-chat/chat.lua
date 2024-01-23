@@ -76,19 +76,16 @@ function M.create_chat(chat_type)
 
   elseif chat_type == "continue" then
     -- open vim telescope to choose a chat file from the chats folder
-    local chat_file = require("telescope.builtin").find_files({
-      prompt_title = "Choose a chat file",
-      cwd = opts.chats_folder,
-      hidden = false,
-      search_file = "*.md",
-    })
-    if chat_file == nil then
-      return
-    end
-    M.filename = vim.fn.fnamemodify(chat_file[1], ":t")
-    -- open the chat file in current window
-    vim.cmd "e .. chat_file[1]"
-    M.bufnr = vim.api.nvim_get_current_buf()
+    -- wait until the user selects a file to continue program execution
+    -- require("telescope.builtin").find_files({
+    --   prompt_title = "Choose a chat file",
+    --   cwd = opts.chats_folder,
+    --   hidden = false,
+    --   search_file = "*.md",
+    -- })
+    M.find_files(opts, chat_type, sel_text_str)
+    -- TODO find a way to set all the options for the opened file
+    return
 
   elseif chat_type == "new" then
     -- open user prompt to enter a new chat file name
@@ -101,7 +98,14 @@ function M.create_chat(chat_type)
     vim.api.nvim_buf_set_name(M.bufnr, M.folder .. "/" .. M.filename)
     vim.api.nvim_set_current_buf(M.bufnr)
   end
+  if chat_type == "new" or chat_type == "quick" then
+    M.setup_chat_buffer(opts, chat_type, sel_text_str)
+  end
+end
 
+M.setup_chat_buffer = function(opts, chat_type, sel_text_str)
+  M.bufnr = vim.api.nvim_get_current_buf()
+  M.winnr = vim.api.nvim_get_current_win()
   vim.api.nvim_set_option_value("filetype", "markdown", { buf = M.bufnr })
   vim.api.nvim_set_option_value("conceallevel", 1, { buf = M.bufnr })
   vim.api.nvim_set_option_value("wrap", true, { win = M.winnr })
@@ -131,9 +135,9 @@ function M.create_chat(chat_type)
     function()
       if util.jobs_length > 0 then
         util.cancel_all_jobs(M.timer, M.bufnr, M.spinner_line)
+        vim.api.nvim_buf_set_lines(M.bufnr, -1, -1, false, { "", "*User*" })
+        vim.cmd [[ normal Go ]]
       end
-      vim.api.nvim_buf_set_lines(M.bufnr, -1, -1, false, { "", "*User*" })
-      vim.cmd [[ normal Go ]]
     end,
     { buffer = M.bufnr, noremap = true, desc = "Stop generating" }
   )
@@ -160,6 +164,7 @@ function M.create_chat(chat_type)
       vim.cmd("hi @text.emphasis " .. hl_opts)
     end
   end
+
   vim.cmd [[ normal G ]]
   vim.cmd [[w!]]  --overwrite file if exists TODO manage chats in an ollama folder
   -- vim.api.nvim_buf_attach(M.bufnr, false, {
@@ -239,4 +244,29 @@ M.chat = {
   },
 }
 
+-- spcify Telescope function to return the name of the file selected
+M.find_files = function(opts, chat_type, sel_text_str)
+  local telescope_opts = {
+    attach_mappings = function(_, map)
+      map("i", "<CR>", function(prompt_bufnr)
+        -- filename is available at entry[1]
+        local chat_entry = require("telescope.actions.state").get_selected_entry()
+        -- vim.print(M.chat_entry)
+        require("telescope.actions").close(prompt_bufnr)
+        local filename = chat_entry[1]
+        local open_file_cmd =  "e " .. opts.chats_folder .. "/" .. filename
+        vim.cmd(open_file_cmd)
+        M.setup_chat_buffer(opts, chat_type, sel_text_str)
+      end)
+
+      return true
+    end,
+    prompt_title = "Choose a chat file",
+    cwd = opts.chats_folder,
+    hidden = false,
+    search_file = "*.md",
+  }
+
+  require("telescope.builtin").find_files(telescope_opts)
+end
 return M

@@ -106,6 +106,20 @@ function M.create_chat(chat_type)
   vim.api.nvim_set_option_value("conceallevel", 1, { buf = M.bufnr })
   vim.api.nvim_set_option_value("wrap", true, { win = M.winnr })
   vim.api.nvim_set_option_value("linebreak", true, { win = M.winnr })
+  -- set highlighting if option is not nil
+  if opts.highlight ~= nil then
+    local hl_opts = ""
+    for k, v in pairs(opts.highlight) do
+      if v ~= nil then
+        hl_opts = hl_opts .. " " .. k .. "=" .. v
+      end
+    end
+    vim.print(hl_opts)
+    if hl_opts ~= "" then
+      -- vim.cmd [[ hi @text.emphasis ]]  -- clear existing highlight
+      vim.cmd("hi @text.emphasis " .. hl_opts)
+    end
+  end
 
   local pre_text = "You are an AI agent *Ollama* that is helping the *User* "
   .. "with his queries. The *User* enters their prompts after lines beginning "
@@ -190,13 +204,18 @@ M.chat = {
 
       if body.done then
         M.timer:stop()
-        vim.api.nvim_buf_set_lines(M.bufnr, #pre_lines, #pre_lines + 1, false, {
+        vim.api.nvim_buf_set_lines(M.bufnr, M.spinner_line, M.spinner_line + 1, false, {
           ("*Ollama in %.2f s*"):format(
             require("ollama-chat.util").nano_to_seconds(body.total_duration)
           )
         })
         vim.api.nvim_buf_set_lines(
           M.bufnr, -1, -1, false, vim.split("\n\n*User*\n", "\n")
+        )
+        vim.schedule_wrap(vim.api.nvim_notify)(
+          "Ollama generation complete.",
+          vim.log.levels.INFO,
+          { title = "Ollama" }
         )
         -- vim.api.nvim_win_set_cursor(0, { -1, 0 }) -- simpler to use norm
         vim.cmd [[ norm G ]]

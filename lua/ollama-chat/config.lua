@@ -15,6 +15,8 @@ M.default_opts = {
     stop_command = "pkill",
     stop_args = { "-SIGTERM", "ollama" },
   },
+  highlight = {
+  },
 }
 
 M.opts = {}

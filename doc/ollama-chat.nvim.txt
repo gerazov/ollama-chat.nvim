@@ -26,6 +26,7 @@ This is a simple plugin that allows you to chat with Ollama models:
 - populate new chat buffer with selected text/code,
 - return to other buffers while Ollama generates a response and get a
   notification when the generation is complete,
+- stop the generation at any point using `q`,
 - chat messages are bound with *User* and *Ollama*, both surrounded with an
   `*`, making it easy to yank, delete, and change them using `i*`.
 
@@ -57,6 +58,8 @@ rather than `model` set in the `opts` table.
 During generation you can go back to your other buffers. Once Ollama
 generation completes an `INFO` level notification will be generated to alert
 the user to return to the chat.
+
+Generation can also be canceled using `q`.
 
 To yank, delete, and change chat messages use `i*` as they are bound with
 *User* and *Ollama*.

@@ -11,6 +11,7 @@ This is a simple plugin that allows you to chat with Ollama models:
 - specify chats folder and continue previous chat, start new or open a quick chat,
 - populate new chat buffer with selected text/code,
 - return to other buffers while Ollama generates a response and get a notification when the generation is complete,
+- stop the generation at any point using `q`,
 - chat messages are bound with *User* and *Ollama*, both surrounded with an `*`, making it easy to yank, delete, and change them using `i*`.
 
 ![ollama chat](https://github.com/nomnivore/ollama.nvim/assets/15214418/8070342e-74d2-4086-afed-6835d954aeb2)
@@ -30,6 +31,8 @@ If there is a selection active when the chat buffer is opened, it is copied in t
 The Ollama model can then be prompted with the chat buffer via `OllamaChat` and `OllamaChatCode`, both of which send the entire buffer to the Ollama server, the difference being that `OllamaChatCode` uses the model `model_code` rather than `model` set in the `opts` table.
 
 During generation you can go back to your other buffers. Once Ollama generation completes an `INFO` level notification will be generated to alert the user to return to the chat.
+
+Generation can also be canceled using `q`.
 
 To yank, delete, and change chat messages use `i*` as they are bound with *User* and *Ollama*.
 

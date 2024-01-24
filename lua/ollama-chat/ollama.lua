@@ -120,7 +120,6 @@ end
 
 function M.prompt(name)
   local ollama_chat_opts = require("ollama-chat.config").opts
-  chat.update_prompts()
   local prompt = chat.prompts[name]
   if prompt == nil or prompt == false then
     vim.api.nvim_notify(("Prompt '%s' not found"):format(name), vim.log.levels.ERROR, { title = "Ollama" })

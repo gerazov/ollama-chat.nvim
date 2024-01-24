@@ -6,6 +6,7 @@ local M = {}
 
 function M.setup(opts)
   config.update_opts(opts)
+  chat.update_prompts()
 
   vim.api.nvim_create_user_command(
     "OllamaCreateNewChat",

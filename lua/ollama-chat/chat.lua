@@ -250,7 +250,7 @@ M.chat = {
           { title = "Ollama" }
         )
         -- vim.api.nvim_win_set_cursor(0, { -1, 0 }) -- simpler to use norm
-        vim.cmd [[ norm G ]]
+        -- vim.cmd [[ norm G ]]
         vim.cmd [[ w ]]
       end
     end

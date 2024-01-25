@@ -142,7 +142,7 @@ If you want to override your Markdown `@text.emphasis` highlight for the *User* 
   },
 ```
 
-## Similar plugins
+## 📋 Similar plugins
 
 - [model.nvim](https://github.com/gsuuon/model.nvim)
 - [ollama.nvim](https://github.com/nomnivore/ollama.nvim)

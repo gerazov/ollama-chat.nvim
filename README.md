@@ -50,6 +50,7 @@ return {
     "stevearc/dressing.nvim",
     "nvim-telescope/telescope.nvim",
   },
+}
 ```
 
 ## ⚙️ Configure

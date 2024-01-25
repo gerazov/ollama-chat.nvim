@@ -121,7 +121,7 @@ M.setup_chat_buffer = function()
   vim.api.nvim_set_option_value("linebreak", true, { win = M.winnr })
 
   -- if chat type is quick or new populate the buffer
-  local pre_text = ""
+  local pre_text
   if M.chat_type == "new" or M.chat_type == "quick" then
     pre_text = "You are an AI agent *Ollama* that is helping the *User* "
     .. "with his queries. The *User* enters their prompts after lines beginning "
@@ -129,11 +129,12 @@ M.setup_chat_buffer = function()
     .. "Your answers start at lines beginning with '*Ollama*'.\n"
     .. "You should output only responses and not the special sequences '*User*' "
     .. "and '*Ollama*'.\n"
+    .. "\n*User*\n"
   else
     -- existing text is pre_text
     pre_text = table.concat(vim.api.nvim_buf_get_lines(M.bufnr, 0, -1, false), "\n")
   end
-  pre_text = pre_text .. M.sel_text_str .. "\n" .. "\n*User*\n"
+  pre_text = pre_text .. M.sel_text_str .. "\n"
   local pre_lines = vim.split(pre_text, "\n")
 
   vim.api.nvim_buf_set_lines(M.bufnr, 0, -1, false, pre_lines)

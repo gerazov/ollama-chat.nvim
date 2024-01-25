@@ -1,4 +1,4 @@
-# 󰧑 Ollama-chat.nvim
+#  Ollama-chat.nvim
 
 > Chat with Ollama models directly in a Neovim buffer!
 

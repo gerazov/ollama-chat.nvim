@@ -1,8 +1,8 @@
-#  Ollama-chat.nvim
+# 🚀 Ollama-chat.nvim
 
 > Chat with Ollama models directly in a Neovim buffer!
 
-## Features
+## ✨Features
 
 This is a simple plugin that allows you to chat with Ollama models:
 - no UI to get in the way - the chat works in a normal Neovim buffer, 
@@ -16,7 +16,7 @@ This is a simple plugin that allows you to chat with Ollama models:
 
 ![ollama chat](https://github.com/nomnivore/ollama.nvim/assets/15214418/8070342e-74d2-4086-afed-6835d954aeb2)
 
-## Usage
+## ⌨️ Usage
 
 This plugin adds the following commands that open an Ollama chat buffer:
 - `OllamaQuickChat` - opens up a quick chat in the `chats_folder` with the `quick_chat_file` name, overwriting previous chats if the file exists,
@@ -36,7 +36,7 @@ Generation can also be canceled using `q`.
 
 To yank, delete, and change chat messages use `i*` as they are bound with *User* and *Ollama*.
 
-## Install
+## 📦 Install 
 
 First you need [Ollama](https://ollama.ai/) installed as per their instructions.
 
@@ -48,10 +48,22 @@ return {
   dependencies = {
     "nvim-lua/plenary.nvim",
     "stevearc/dressing.nvim",
+    "nvim-telescope/telescope.nvim",
+  },
+```
+
+## ⚙️ Configure
+
+Here's how you can add lazy loading, some keymaps and configure options:
+
+```lua
+return {
+  "gerazov/ollama-chat.nvim",
+  dependencies = {
+    "nvim-lua/plenary.nvim",
     "stevearc/dressing.nvim",
     "nvim-telescope/telescope.nvim",
   },
-
   -- lazy load on command
   cmd = {
     "OllamaQuickChat",

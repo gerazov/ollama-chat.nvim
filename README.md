@@ -36,6 +36,8 @@ Generation can also be canceled using `q`.
 
 To yank, delete, and change chat messages use `i*` as they are bound with *User* and *Ollama*.
 
+The spinner animation can be disabled via the `animate_spinner` option. This is handy to keep the undo history clean if you want to use say undo tree. 
+
 ## 📦 Install 
 
 First you need [Ollama](https://ollama.ai/) installed as per their instructions.
@@ -119,6 +121,7 @@ return {
     chats_folder = vim.fn.stdpath("data"), -- data folder is ~/.local/share/nvim
     -- you can also choose "current" and "tmp"
     quick_chat_file = "ollama-chat.md",
+    animate_spinner = true,  -- set this to false to disable spinner animation
     model = "openhermes2-mistral",
     model_code = "codellama",
     url = "http://127.0.0.1:11434",

@@ -198,6 +198,7 @@ M.chat = {
     local tokens = {}
     -- show a rotating spinner while waiting for the response
     M.spinner_line = #pre_lines
+    local opts = require("ollama-chat.config").opts
     M.timer = util.show_spinner(
       M.bufnr,
       { start_ln = #pre_lines, end_ln = #pre_lines + 1 }
@@ -215,7 +216,9 @@ M.chat = {
       on_detach = function()
         if job ~= nil then
           is_canceled = true
-          M.timer:stop()
+          if M.timer ~= nil then
+            M.timer:stop()
+          end
           job:shutdown()
         end
       end,
@@ -226,7 +229,9 @@ M.chat = {
       -- if job == nil then
         job = _job
         if is_canceled then
-          M.timer:stop()
+          if M.timer ~= nil then
+            M.timer:stop()
+          end
           job:shutdown()
         end
       end
@@ -236,7 +241,9 @@ M.chat = {
       )
 
       if body.done then
-        M.timer:stop()
+        if M.timer ~= nil then
+          M.timer:stop()
+        end
         vim.api.nvim_buf_set_lines(M.bufnr, M.spinner_line, M.spinner_line + 1, false, {
           ("*Ollama in %.2f s*"):format(
             require("ollama-chat.util").nano_to_seconds(body.total_duration)

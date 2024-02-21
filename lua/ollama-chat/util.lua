@@ -77,7 +77,9 @@ function M.cancel_all_jobs(timer, bufnr, spinner_line)
         { title = "Ollama" }
       )
     end
-    timer:stop()
+    if timer ~= nil then
+      timer:stop()
+    end
     job:shutdown()
     if opts.debug then
       vim.schedule_wrap(vim.api.nvim_notify)(
@@ -128,18 +130,23 @@ function M.show_spinner(bufnr, opts)
   local spinner_chars = { "⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏" }
   local curr_char = 1
   local spinner_lines = {}
-  local timer = vim.loop.new_timer()
-  timer:start(
-    100,
-    100,
-    vim.schedule_wrap(function()
-      spinner_lines = vim.split(opts.format:format(spinner_chars[curr_char]), "\n")
-      vim.api.nvim_buf_set_lines(bufnr, opts.start_ln, opts.end_ln, false, spinner_lines)
-      curr_char = curr_char % #spinner_chars + 1
-    end)
-  )
-
-  return timer
+  local config_opts = require("ollama-chat.config").opts
+  if config_opts.animate_spinner then
+    local timer = vim.loop.new_timer()
+    timer:start(
+      100,
+      100,
+      vim.schedule_wrap(function()
+        spinner_lines = vim.split(opts.format:format(spinner_chars[curr_char]), "\n")
+        vim.api.nvim_buf_set_lines(bufnr, opts.start_ln, opts.end_ln, false, spinner_lines)
+        curr_char = curr_char % #spinner_chars + 1
+      end)
+    )
+    return timer
+  end
+  spinner_lines = vim.split(opts.format:format(""), "\n")
+  vim.api.nvim_buf_set_lines(bufnr, opts.start_ln, opts.end_ln, false, spinner_lines)
+  return nil
 end
 
 -- Get the current selection range, if any, adjusting for 0-based indexing.

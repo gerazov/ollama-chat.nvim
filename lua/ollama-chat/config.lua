@@ -5,6 +5,7 @@ M.default_opts = {
   model_code = "codellama",
   url = "http://127.0.0.1:11434",
   prompts = {},  -- generated in setup
+  animate_spinner = true,  -- set this to false to disable spinner
   chats_folder = vim.fn.stdpath("data"), -- data folder is ~/.local/share/nvim
   -- can be "current" and "tmp"
   quick_chat_file = "ollama-chat.md",

@@ -116,7 +116,7 @@ M.setup_chat_buffer = function()
   M.winnr = vim.api.nvim_get_current_win()
   vim.b.ollama_chat = true
   vim.api.nvim_set_option_value("filetype", "markdown", { buf = M.bufnr })
-  vim.api.nvim_set_option_value("conceallevel", 1, { buf = M.bufnr })
+  vim.api.nvim_set_option_value("conceallevel", 1, { win = M.winnr })
   vim.api.nvim_set_option_value("wrap", true, { win = M.winnr })
   vim.api.nvim_set_option_value("linebreak", true, { win = M.winnr })
 

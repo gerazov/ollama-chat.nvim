@@ -5,7 +5,7 @@
 ## ✨Features
 
 This is a simple plugin that allows you to chat with Ollama models:
-- no UI to get in the way - the chat works in a normal Neovim buffer, 
+- no UI to get in the way - the chat works in a normal Neovim buffer,
 - chat history is completely modifiable - the whole conversation is sent to the model with each new prompt,
 - start a chat in any open buffer,
 - specify chats folder and continue previous chat, start new or open a quick chat,
@@ -24,7 +24,7 @@ This plugin adds the following commands that open an Ollama chat buffer:
 - `OllamaContinueChat` - opens up `Telescope` to let the user choose one of previous chats in `chats_folder`,
 - alternatively open a new `md` buffer anywhere and use it as a chat buffer.
 
-The chat buffer is populated with a base prompt and is completely modifiable. 
+The chat buffer is populated with a base prompt and is completely modifiable.
 
 If there is a selection active when the chat buffer is opened, it is copied in the new chat buffer as text, or within a corresponding code block if the source file type is code.
 
@@ -36,9 +36,9 @@ Generation can also be canceled using `q`.
 
 To yank, delete, and change chat messages use `i*` as they are bound with *User* and *Ollama*.
 
-The spinner animation can be disabled via the `animate_spinner` option. This is handy to keep the undo history clean if you want to use say undo tree. 
+The spinner animation can be disabled via the `animate_spinner` option. This is handy to keep the undo history clean if you want to use say undo tree.
 
-## 📦 Install 
+## 📦 Install
 
 First you need [Ollama](https://ollama.ai/) installed as per their instructions.
 
@@ -133,6 +133,7 @@ return {
       stop_args = { "-SIGTERM", "ollama" },
     },
   }
+}
 ```
 If you want to override your Markdown `@text.emphasis` highlight for the *User* and *Ollama* labels, you can add the following table to your `opts`:
 

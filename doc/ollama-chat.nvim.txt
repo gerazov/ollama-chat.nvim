@@ -27,7 +27,7 @@ This is a simple plugin that allows you to chat with Ollama models:
 - return to other buffers while Ollama generates a response and get a
   notification when the generation is complete,
 - stop the generation at any point using `q`,
-- chat messages are bound with *User* and *Ollama*, both surrounded with an
+- chat messages are bound with User and Ollama, both surrounded with an
   `*`, making it easy to yank, delete, and change them using `i*`.
 
 
@@ -62,7 +62,7 @@ the user to return to the chat.
 Generation can also be canceled using `q`.
 
 To yank, delete, and change chat messages use `i*` as they are bound with
-*User* and *Ollama*.
+`*`s for the User and Ollama.
 
 The spinner animation can be disabled via the `animate_spinner` option. This
 is handy to keep the undo history clean if you want to use say undo tree.
@@ -156,7 +156,7 @@ To use the plugin with `lazy.nvim` you can add the file
     }
 <
 If you want to override your Markdown `@text.emphasis` highlight for the
-*User* and *Ollama* labels, you can add the following table to your `opts`:
+User and Ollama labels, you can add the following table to your `opts`:
 
 >lua
       opts = {

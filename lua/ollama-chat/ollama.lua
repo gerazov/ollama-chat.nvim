@@ -164,6 +164,7 @@ function M.prompt(name)
       system = prompt.system,
       format = prompt.format,
       options = prompt.options,
+      keep_alive = "24h",
     }),
     stream = function(_, chunk, job)
       if stream then
